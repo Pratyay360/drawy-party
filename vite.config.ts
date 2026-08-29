@@ -24,7 +24,7 @@ export default defineConfig({
         react(),
         tailwindcss(),
         nitro({
-            preset: "cloudflare_module",
+            preset: "vercel",
             rollupConfig: {
                 external: [/@excalidraw\/excalidraw/, /@excalidraw\/laser-pointer/],
                 output: {

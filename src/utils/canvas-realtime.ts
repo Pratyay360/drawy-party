@@ -5,6 +5,8 @@ import YPartyKitProvider from "y-partykit/provider";
 import * as Y from "yjs";
 import { SINGLETON_ROOM_ID } from "../party/rooms";
 
+const PARTYKIT_HOST = import.meta.env.VITE_PARTYKIT_HOST!;
+
 export interface ScenePayload {
     elements: readonly ExcalidrawElement[];
     files?: BinaryFiles;
@@ -48,7 +50,7 @@ export class CanvasRealtime {
     connect() {
         if (this.socket) return;
         const socket = new PartySocket({
-            host: import.meta.env.VITE_PARTYKIT_HOST!,
+            host: PARTYKIT_HOST,
             party: "main",
             room: this.canvasId,
         });
@@ -63,7 +65,7 @@ export class CanvasRealtime {
 
         const ydoc = new Y.Doc();
         const provider = new YPartyKitProvider(
-            import.meta.env.VITE_PARTYKIT_HOST!,
+            PARTYKIT_HOST,
             this.canvasId,
             ydoc,
             {
@@ -87,7 +89,7 @@ export class CanvasRealtime {
 
         // 3) rooms singleton fallback
         const pSocket = new PartySocket({
-            host: import.meta.env.VITE_PARTYKIT_HOST!,
+            host: PARTYKIT_HOST,
             party: "rooms",
             room: SINGLETON_ROOM_ID,
         });
@@ -179,7 +181,7 @@ function ensureGlobalSocket(): PartySocket | null {
     if (typeof window === "undefined") return null;
     if (globalSocket) return globalSocket;
     const socket = new PartySocket({
-        host: import.meta.env.VITE_PARTYKIT_HOST!,
+        host: PARTYKIT_HOST,
         party: "rooms",
         room: SINGLETON_ROOM_ID,
     });
@@ -190,7 +192,7 @@ function ensureGlobalSocket(): PartySocket | null {
         } catch {}
     };
     socket.onopen = () => {
-        while (pendingGlobalMessages.length > 0) socket.send(pendingGlobalMessages?.shift);
+        while (pendingGlobalMessages.length > 0) socket.send(pendingGlobalMessages.shift());
     };
     globalSocket = socket;
     return socket;

@@ -1,0 +1,1 @@
+import{t as e}from"./jsx-runtime-DREnUpxT.js";import{a as t}from"./createLucideIcon-CRUNpjwY.js";var n=e();function r({ref:e,justify:r,align:i,hAlign:a,vAlign:o,...s}){return(0,n.jsx)(t,{...s,direction:`horizontal`,hAlign:a??r,vAlign:o??i,ref:e})}r.displayName=`HStack`;export{r as t};
