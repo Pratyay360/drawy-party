@@ -24,7 +24,7 @@ export default defineConfig({
 		react(),
 		tailwindcss(),
 		nitro({
-			preset: "cloudflare-pages",
+			preset: "cloudflare-module",
 			rollupConfig: {
 				external: [/@excalidraw\/excalidraw/, /@excalidraw\/laser-pointer/],
 				output: {
