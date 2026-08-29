@@ -1,1 +1,0 @@
-import{t as e}from"./jsx-runtime-DREnUpxT.js";var t=e();function n(){return(0,t.jsx)(`p`,{children:`Not found`})}export{n as notFoundComponent};
