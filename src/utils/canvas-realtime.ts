@@ -5,7 +5,27 @@ import YPartyKitProvider from "y-partykit/provider";
 import * as Y from "yjs";
 import { SINGLETON_ROOM_ID } from "../party/rooms";
 
-const PARTYKIT_HOST = import.meta.env.VITE_PARTYKIT_HOST!;
+function resolvePartykitHost(): string | undefined {
+    const fromHost = import.meta.env.VITE_PARTYKIT_HOST as string | undefined;
+    if (fromHost) return fromHost;
+    const fromUrl = import.meta.env.VITE_PARTYKIT_URL as string | undefined;
+    if (fromUrl) {
+        try {
+            if (fromUrl.includes("://")) return new URL(fromUrl).host;
+            return fromUrl.split("/")[0];
+        } catch {
+            return fromUrl.replace(/^(http|https|ws|wss):\/\//, "").split("/")[0];
+        }
+    }
+    if (typeof window !== "undefined" && window.location?.host) return window.location.host;
+    return undefined;
+}
+
+const PARTYKIT_HOST = resolvePartykitHost();
+
+function getPartykitHost(): string | undefined {
+    return PARTYKIT_HOST ?? (typeof window !== "undefined" ? window.location.host : undefined);
+}
 
 export interface ScenePayload {
     elements: readonly ExcalidrawElement[];
@@ -49,8 +69,13 @@ export class CanvasRealtime {
 
     connect() {
         if (this.socket) return;
+        const host = getPartykitHost();
+        if (!host) {
+            console.warn("[canvas-realtime] PARTYKIT_HOST not configured — realtime disabled");
+            return;
+        }
         const socket = new PartySocket({
-            host: PARTYKIT_HOST,
+            host,
             party: "main",
             room: this.canvasId,
         });
@@ -65,7 +90,7 @@ export class CanvasRealtime {
 
         const ydoc = new Y.Doc();
         const provider = new YPartyKitProvider(
-            PARTYKIT_HOST,
+            host,
             this.canvasId,
             ydoc,
             {
@@ -89,7 +114,7 @@ export class CanvasRealtime {
 
         // 3) rooms singleton fallback
         const pSocket = new PartySocket({
-            host: PARTYKIT_HOST,
+            host,
             party: "rooms",
             room: SINGLETON_ROOM_ID,
         });
@@ -180,8 +205,13 @@ const pendingGlobalMessages: string[] = [];
 function ensureGlobalSocket(): PartySocket | null {
     if (typeof window === "undefined") return null;
     if (globalSocket) return globalSocket;
+    const host = getPartykitHost();
+    if (!host) {
+        console.warn("[canvas-realtime] PARTYKIT_HOST not configured — canvas list realtime disabled");
+        return null;
+    }
     const socket = new PartySocket({
-        host: PARTYKIT_HOST,
+        host,
         party: "rooms",
         room: SINGLETON_ROOM_ID,
     });

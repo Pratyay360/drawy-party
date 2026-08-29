@@ -7,13 +7,22 @@ import { defineConfig } from "vite";
 export default defineConfig({
     server: {
         allowedHosts: true,
-        proxy: {
-            "/parties": {
-                target: process.env.VITE_PARTYKIT_HOST,
-                ws: true,
-                changeOrigin: true,
-            },
-        },
+        proxy: (() => {
+            const target =
+                process.env.VITE_PARTYKIT_HOST ??
+                process.env.VITE_PARTYKIT_URL ??
+                undefined;
+            if (!target) return undefined;
+            // Vite proxy expects a full URL; if only a host is provided, prefix with http://
+            const normalized = target.includes("://") ? target : `http://${target}`;
+            return {
+                "/parties": {
+                    target: normalized,
+                    ws: true,
+                    changeOrigin: true,
+                },
+            };
+        })(),
     },
     ssr: {
         external: ["@excalidraw/excalidraw", "@excalidraw/laser-pointer"],
