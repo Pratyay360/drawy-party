@@ -264,7 +264,7 @@ export function CanvasEditor({ id, username: propUsername }: CanvasEditorProps) 
                                     <RealtimeCursors
                                         roomName={id}
                                         username={lifecycle.username || "Anonymous"}
-                                        awareness={lifecycle.realtimeRef.current?.getAwareness()}
+                                        awareness={lifecycle.awareness}
                                     />
                                 </Suspense>
                                 {lifecycle.excalidrawModule ? (

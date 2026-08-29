@@ -1,6 +1,6 @@
 import type { BinaryFiles } from "@excalidraw/excalidraw/types";
 import { useNavigate } from "@tanstack/react-router";
-import { useCallback, useEffect, useRef } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useCanvasStore } from "#/stores/canvas";
 import { loadCanvas, sanitizeExcalidrawAppState, saveCanvas } from "../../services/canvases";
 import { getUserLibrary } from "../../services/libraries";
@@ -48,6 +48,7 @@ export function useCanvasLifecycle({ id }: UseCanvasLifecycleOptions) {
     }
     const isSavingRef = useRef(false);
     const realtimeRef = useRef<CanvasRealtime | null>(null);
+    const [awareness, setAwareness] = useState<import("y-protocols/awareness").Awareness | undefined>(undefined);
     const applyingRemoteRef = useRef(false);
     const lastLocalEditRef = useRef(0);
     const lastSavedData = useRef<{
@@ -172,6 +173,7 @@ export function useCanvasLifecycle({ id }: UseCanvasLifecycleOptions) {
         const rt = new CanvasRealtime(id, username || "Anonymous");
         realtimeRef.current = rt;
         rt.connect();
+        setAwareness(rt.getAwareness());
 
         const offScene = rt.onScene((payload: ScenePayload) => {
             const api = excalidrawAPI;
@@ -206,6 +208,7 @@ export function useCanvasLifecycle({ id }: UseCanvasLifecycleOptions) {
             offPresence();
             rt.disconnect();
             realtimeRef.current = null;
+            setAwareness(undefined);
         };
     }, [id, excalidrawAPI, fetchCanvas, setCollaborators, username]);
 
@@ -241,6 +244,7 @@ export function useCanvasLifecycle({ id }: UseCanvasLifecycleOptions) {
     }, [resetCanvas]);
 
     return {
+        awareness,
         // State
         canvasData,
         loading,
