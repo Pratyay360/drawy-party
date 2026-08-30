@@ -4,12 +4,15 @@ Project-specific guidance for AI coding agents.
 
 [partykit](https://raw.githubusercontent.com/cloudflare/partykit/refs/heads/main/AGENTS.md)
 
+[yjs](https://docs.yjs.dev/~gitbook/mcp)
+
 <!-- ASTRYX:START -->
 
 Astryx v0.5.0 · 163 components
 CLI: run every command as `bunx astryx <cmd>` (shown below as `astryx ...`).
 
-SETUP (once, in your app entry e.g. main.tsx) — without these, components render unstyled:
+SETUP (once, in your app entry e.g. main.tsx) — without these, components render
+unstyled:
 import "@astryxdesign/core/reset.css";
 import "@astryxdesign/core/astryx.css";
 

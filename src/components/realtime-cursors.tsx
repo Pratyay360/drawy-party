@@ -3,37 +3,37 @@
 import { useRealtimeCursors } from "../hooks/realtime-cursor-react";
 import { Cursor } from "./cursor";
 export const RealtimeCursors = ({
-    roomName,
-    username,
-    awareness,
+	roomName,
+	username,
+	awareness,
 }: {
-    roomName: string;
-    username: string;
-    awareness?: import("y-protocols/awareness").Awareness;
+	roomName: string;
+	username: string;
+	awareness?: import("y-protocols/awareness").Awareness;
 }) => {
-    const { cursors } = useRealtimeCursors({
-        roomName,
-        username,
-        throttleMs: 30,
-        awareness,
-    });
+	const { cursors } = useRealtimeCursors({
+		roomName,
+		username,
+		throttleMs: 30,
+		awareness,
+	});
 
-    return (
-        <div>
-            {Object.keys(cursors).map((id) => (
-                <Cursor
-                    key={id}
-                    className="fixed transition-transform ease-in-out z-50"
-                    style={{
-                        transitionDuration: "30ms",
-                        top: 0,
-                        left: 0,
-                        transform: `translate(${cursors[id].position.x}px, ${cursors[id].position.y}px)`,
-                    }}
-                    color={cursors[id].color}
-                    name={cursors[id].user.name}
-                />
-            ))}
-        </div>
-    );
+	return (
+		<div>
+			{Object.keys(cursors).map((id) => (
+				<Cursor
+					key={id}
+					className="fixed transition-transform ease-in-out z-50"
+					style={{
+						transitionDuration: "30ms",
+						top: 0,
+						left: 0,
+						transform: `translate(${cursors[id].position.x}px, ${cursors[id].position.y}px)`,
+					}}
+					color={cursors[id].color}
+					name={cursors[id].user.name}
+				/>
+			))}
+		</div>
+	);
 };
