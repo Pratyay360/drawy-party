@@ -7,9 +7,6 @@ import * as Y from "yjs";
 import { SINGLETON_ROOM_ID } from "./rooms";
 
 // Ephemeral Yjs server — no persistence.
-// Previous version used y-partykit with `persist: true` and stored huge
-// Excalidraw scene blobs as Yjs updates, which produced truncated chunks
-// (128KB splits) that decode as "Unexpected end of array".
 // The scene itself is persisted in the app database; the doc lives only in
 // memory for the lifetime of the room.
 
@@ -19,6 +16,14 @@ const messageQueryAwareness = 3;
 const BATCH_SENTINEL = "y-pk-batch";
 
 type IncomingMessage = string | ArrayBuffer | ArrayBufferView;
+
+/** Binary frames can arrive as a Blob when the server-side WebSocket
+ * `binaryType` is "blob" (the default in PartyKit's local dev runtime and
+ * some Cloudflare runtimes). We normalize everything to Uint8Array; a Blob
+ * is read asynchronously before being handed to the (sync) receive path. */
+function isBlobLike(value: unknown): value is Blob {
+	return typeof Blob !== "undefined" && value instanceof Blob;
+}
 
 interface BatchMarker {
 	type: "start" | "end";
@@ -34,13 +39,25 @@ function toBytes(data: ArrayBuffer | ArrayBufferView): Uint8Array {
 	return new Uint8Array(data.buffer, data.byteOffset, data.byteLength);
 }
 
+/** Normalize any binary frame to a Uint8Array, awaiting Blobs. */
+async function toBytesAsync(
+	data: ArrayBuffer | ArrayBufferView | Blob,
+): Promise<Uint8Array> {
+	if (isBlobLike(data)) return new Uint8Array(await data.arrayBuffer());
+	return toBytes(data);
+}
+
 /** y-partykit's client splits updates larger than 1MB into a
  * `start` marker, N binary chunks and an `end` marker. Reassemble them and
  * hand complete updates to `receive`. Returns true when the message was
- * consumed, so callers can route non-Yjs strings elsewhere. */
+ * consumed, so callers can route non-Yjs strings elsewhere.
+ *
+ * Binary frames can arrive as a Blob when the server-side WebSocket
+ * `binaryType` is "blob" (PartyKit's local dev runtime defaults to this).
+ * Such frames are awaited before being handed to the (sync) receive path. */
 function createMessageReceiver(
 	receive: (data: Uint8Array) => void,
-): (message: IncomingMessage) => boolean {
+): (message: IncomingMessage) => Promise<boolean> {
 	let chunks: Uint8Array[] | null = null;
 	let start: BatchMarker | null = null;
 	let failed = false;
@@ -51,7 +68,7 @@ function createMessageReceiver(
 		failed = true;
 	};
 
-	return (message: IncomingMessage): boolean => {
+	return async (message: IncomingMessage): Promise<boolean> => {
 		if (typeof message === "string") {
 			if (!message.startsWith(BATCH_SENTINEL)) return false;
 			const json = message.slice(message.indexOf("#") + 1);
@@ -96,6 +113,12 @@ function createMessageReceiver(
 			}
 			return true;
 		}
+		if (isBlobLike(message)) {
+			const bytes = await toBytesAsync(message);
+			if (chunks) chunks.push(bytes);
+			else receive(bytes);
+			return true;
+		}
 		if (chunks) {
 			chunks.push(toBytes(message));
 			return true;
@@ -105,7 +128,7 @@ function createMessageReceiver(
 	};
 }
 
-/** Truncated frames from buggy/old clients decode as lib0's
+/** Empty or malformed binary frames decode as lib0's
  * "Unexpected end of array". They are safe to drop — the next sync round
  * will reconcile state. */
 function isTruncatedUpdate(error: unknown): boolean {
@@ -117,8 +140,8 @@ function isTruncatedUpdate(error: unknown): boolean {
 interface Client {
 	/** Awareness clientIDs owned by this connection, removed on disconnect. */
 	controlledStates: Set<number>;
-	/** Chunk-aware Yjs frame receiver. */
-	receive: (message: IncomingMessage) => boolean;
+	/** Chunk-aware Yjs frame receiver. Returns true when consumed. */
+	receive: (message: IncomingMessage) => Promise<boolean>;
 }
 
 export default class EditorServer implements Party.Server {
@@ -139,6 +162,18 @@ export default class EditorServer implements Party.Server {
 	}
 
 	async onConnect(conn: Party.Connection) {
+		// Normalize binary frames to ArrayBuffer. PartyKit's local dev
+		// runtime (undici WebSocket) defaults binaryType to "blob", which
+		// delivers binary frames as Blob — a Blob has no .buffer, so the
+		// old toBytes produced an empty Uint8Array that decoded as
+		// "Unexpected end of array". Setting arraybuffer fixes dev/prod parity.
+		try {
+			// Connection extends WebSocket; binaryType may be absent on
+			// some runtimes, so guard with an optional cast.
+			(conn as unknown as { binaryType?: string }).binaryType = "arraybuffer";
+		} catch {
+			// Some runtimes don't expose binaryType; toBytesAsync handles Blobs.
+		}
 		await this.cleanLegacyStorage();
 		this.ensureDoc();
 		const { doc, awareness } = this;
@@ -182,9 +217,9 @@ export default class EditorServer implements Party.Server {
 		}
 	}
 
-	onMessage(message: IncomingMessage, sender: Party.Connection) {
+	async onMessage(message: IncomingMessage, sender: Party.Connection) {
 		const client = this.clients.get(sender);
-		if (client?.receive(message)) {
+		if (client && (await client.receive(message))) {
 			return;
 		}
 		if (typeof message !== "string") return;
@@ -302,14 +337,14 @@ export default class EditorServer implements Party.Server {
 				}
 				const encoder = encoding.createEncoder();
 				encoding.writeVarUint(encoder, messageAwareness);
-					encoding.writeVarUint8Array(
-						encoder,
-						awarenessProtocol.encodeAwarenessUpdate(awareness, changed),
-					);
-					const bytes = encoding.toUint8Array(encoder);
-					this.broadcastToTag("presence", bytes);
-				},
-			);
+				encoding.writeVarUint8Array(
+					encoder,
+					awarenessProtocol.encodeAwarenessUpdate(awareness, changed),
+				);
+				const bytes = encoding.toUint8Array(encoder);
+				this.broadcastToTag("presence", bytes);
+			},
+		);
 
 		// Doc updates (from sync step 2 or diff updates) are relayed to every
 		// other peer. Applying an update twice is idempotent in Yjs, but
