@@ -3,23 +3,20 @@
 import { useRealtimeCursors } from "../hooks/realtime-cursor-react";
 import { Cursor } from "./cursor";
 export const RealtimeCursors = ({
-	roomName,
 	username,
 	awareness,
 }: {
-	roomName: string;
 	username: string;
 	awareness?: import("y-protocols/awareness").Awareness;
 }) => {
 	const { cursors } = useRealtimeCursors({
-		roomName,
 		username,
 		throttleMs: 30,
 		awareness,
 	});
 
 	return (
-		<div>
+		<>
 			{Object.keys(cursors).map((id) => (
 				<Cursor
 					key={id}
@@ -34,6 +31,6 @@ export const RealtimeCursors = ({
 					name={cursors[id].user.name}
 				/>
 			))}
-		</div>
+		</>
 	);
 };

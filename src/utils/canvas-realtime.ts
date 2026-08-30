@@ -25,6 +25,12 @@ function getPartykitHost(): string | undefined {
   return PARTYKIT_HOST ?? (typeof window !== "undefined" ? window.location.host : undefined);
 }
 
+/** One color per session so the awareness badge and the cursor rendered from
+ * it never disagree. */
+function pickPresenceColor(): string {
+  return `hsl(${Math.floor(Math.random() * 360)}, 100%, 70%)`;
+}
+
 export interface ScenePayload {
   elements: readonly ExcalidrawElement[];
   files?: BinaryFiles;
@@ -59,6 +65,8 @@ export class CanvasRealtime {
   private lastRooms: Record<string, number> = {};
   private sceneTimer: ReturnType<typeof setTimeout> | null = null;
   private pendingScene: ScenePayload | null = null;
+  private teardownAwareness: (() => void) | null = null;
+  private readonly presenceColor = pickPresenceColor();
 
   constructor(
     private readonly canvasId: string,
@@ -93,19 +101,27 @@ export class CanvasRealtime {
     const awareness = provider.awareness;
     awareness.setLocalStateField("user", {
       name: this.username,
-      color: `hsl(${Math.floor(Math.random() * 360)}, 100%, 70%)`,
+      color: this.presenceColor,
     });
+
     const onAwareness = () => {
       const count = awareness.getStates().size;
       this.presenceCbs.forEach((fn) => fn(count));
     };
     awareness.on("change", onAwareness);
-    setTimeout(onAwareness, 300);
+    // The local state lands in getStates() on the next tick; nudge presence
+    // once so a solo user immediately sees "1 active user".
+    const initialTimer = setTimeout(onAwareness, 300);
+    this.teardownAwareness = () => {
+      clearTimeout(initialTimer);
+      awareness.off("change", onAwareness);
+    };
 
     this.ydoc = ydoc;
     this.provider = provider;
 
-    // 3) rooms singleton fallback
+    // Occupancy singleton: fallback presence for canvases this client is not
+    // connected to (e.g. the sidebar list).
     const pSocket = new PartySocket({
       host,
       party: "rooms",
@@ -128,12 +144,6 @@ export class CanvasRealtime {
 
   getAwareness() {
     return this.provider?.awareness;
-  }
-  getYDoc() {
-    return this.ydoc;
-  }
-  getProvider() {
-    return this.provider;
   }
 
   broadcastScene(elements: readonly ExcalidrawElement[], files?: BinaryFiles) {
@@ -176,6 +186,8 @@ export class CanvasRealtime {
       clearTimeout(this.sceneTimer);
       this.sceneTimer = null;
     }
+    this.teardownAwareness?.();
+    this.teardownAwareness = null;
     this.socket?.close();
     this.socket = undefined;
     this.provider?.destroy();

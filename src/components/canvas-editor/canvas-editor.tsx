@@ -280,7 +280,6 @@ export function CanvasEditor({
 							<div className="absolute inset-0">
 								<Suspense fallback={null}>
 									<RealtimeCursors
-										roomName={id}
 										username={lifecycle.username || "Anonymous"}
 										awareness={lifecycle.awareness}
 									/>
