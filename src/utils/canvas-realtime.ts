@@ -84,6 +84,7 @@ export class CanvasRealtime {
       host,
       party: "main",
       room: this.canvasId,
+      query: { kind: "scene" },
     });
     socket.onmessage = (event) => {
       try {
@@ -97,7 +98,8 @@ export class CanvasRealtime {
     const ydoc = new Y.Doc();
     const provider = new YPartyKitProvider(host, this.canvasId, ydoc, {
       party: "main",
-    } as unknown as ConstructorParameters<typeof YPartyKitProvider>[3]);
+      params: { kind: "presence" },
+    });
     const awareness = provider.awareness;
     awareness.setLocalStateField("user", {
       name: this.username,

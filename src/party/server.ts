@@ -130,6 +130,14 @@ export default class EditorServer implements Party.Server {
 
 	constructor(public room: Party.Room) {}
 
+	getConnectionTags(
+		_connection: Party.Connection,
+		context: Party.ConnectionContext,
+	) {
+		const kind = new URL(context.request.url).searchParams.get("kind");
+		return kind ? [kind] : [];
+	}
+
 	async onConnect(conn: Party.Connection) {
 		await this.cleanLegacyStorage();
 		this.ensureDoc();
@@ -172,13 +180,13 @@ export default class EditorServer implements Party.Server {
 		} catch (e) {
 			console.error("[drawy] initial sync failed", e);
 		}
-
-		void this.reportOccupancy();
 	}
 
 	onMessage(message: IncomingMessage, sender: Party.Connection) {
 		const client = this.clients.get(sender);
-		if (client?.receive(message)) return;
+		if (client?.receive(message)) {
+			return;
+		}
 		if (typeof message !== "string") return;
 
 		let data: Record<string, unknown>;
@@ -192,7 +200,7 @@ export default class EditorServer implements Party.Server {
 			data["type"] === "saved" ||
 			data["event"] === "realtime-cursor-move"
 		) {
-			this.room.broadcast(message, [sender.id]);
+			this.broadcastToTag("scene", message, sender.id);
 		}
 	}
 
@@ -227,10 +235,28 @@ export default class EditorServer implements Party.Server {
 			if (!rooms) return;
 			await rooms.get(SINGLETON_ROOM_ID).fetch("/", {
 				method: "POST",
-				body: JSON.stringify({ room: this.room.id, count: this.clients.size }),
+				body: JSON.stringify({
+					room: this.room.id,
+					count: Array.from(this.room.getConnections("presence")).length,
+				}),
 			});
 		} catch (e) {
 			console.warn("[drawy] failed to report occupancy", e);
+		}
+	}
+
+	private broadcastToTag(
+		tag: string,
+		message: string | Uint8Array,
+		excludeId?: string,
+	) {
+		for (const conn of this.room.getConnections(tag)) {
+			if (conn.id === excludeId) continue;
+			try {
+				conn.send(message);
+			} catch {
+				// A dead connection is cleaned up by onClose/onError.
+			}
 		}
 	}
 
@@ -276,20 +302,14 @@ export default class EditorServer implements Party.Server {
 				}
 				const encoder = encoding.createEncoder();
 				encoding.writeVarUint(encoder, messageAwareness);
-				encoding.writeVarUint8Array(
-					encoder,
-					awarenessProtocol.encodeAwarenessUpdate(awareness, changed),
-				);
-				const bytes = encoding.toUint8Array(encoder);
-				for (const [conn] of this.clients) {
-					try {
-						conn.send(bytes);
-					} catch {
-						// a dead connection is cleaned up by onClose/onError
-					}
-				}
-			},
-		);
+					encoding.writeVarUint8Array(
+						encoder,
+						awarenessProtocol.encodeAwarenessUpdate(awareness, changed),
+					);
+					const bytes = encoding.toUint8Array(encoder);
+					this.broadcastToTag("presence", bytes);
+				},
+			);
 
 		// Doc updates (from sync step 2 or diff updates) are relayed to every
 		// other peer. Applying an update twice is idempotent in Yjs, but
@@ -299,14 +319,11 @@ export default class EditorServer implements Party.Server {
 			encoding.writeVarUint(encoder, messageSync);
 			syncProtocol.writeUpdate(encoder, update);
 			const bytes = encoding.toUint8Array(encoder);
-			for (const [conn] of this.clients) {
-				if (conn.id === (origin as Party.Connection | null)?.id) continue;
-				try {
-					conn.send(bytes);
-				} catch {
-					// a dead connection is cleaned up by onClose/onError
-				}
-			}
+			this.broadcastToTag(
+				"presence",
+				bytes,
+				(origin as Party.Connection | null)?.id,
+			);
 		});
 
 		this.doc = doc;
