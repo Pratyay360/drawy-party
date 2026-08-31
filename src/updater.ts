@@ -1,6 +1,6 @@
 export interface UpdateInfo {
-	version: string;
-	notes?: string;
+    version: string;
+    notes?: string;
 }
 
 /**
@@ -9,9 +9,9 @@ export interface UpdateInfo {
  * ever firing; a native/desktop build can implement them for real.
  */
 export function onUpdateAvailable(
-	_callback: (info: UpdateInfo) => void,
+    _callback: (info: UpdateInfo) => void,
 ): () => void {
-	return () => {};
+    return () => {};
 }
 
 export async function installUpdate(_version: string): Promise<void> {}
