@@ -17,7 +17,6 @@
 	"dependencies": {
 		"@astryxdesign/cli": "^0.5.1",
 		"@astryxdesign/core": "^0.5.1",
-		"@astryxdesign/theme-neutral": "^0.5.1",
 		"@excalidraw/excalidraw": "^0.18.1",
 		"@neodrag/react": "^2.3.1",
 		"@orpc/client": "^1.15.0",
