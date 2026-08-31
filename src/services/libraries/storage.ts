@@ -1,9 +1,6 @@
 import type { LibraryItem } from "@excalidraw/excalidraw/types";
 import { SAVED_LIBRARIES_KEY, USER_LIBRARY_KEY } from "./constants";
-import {
-    notifyLibraryConfigUpdated,
-    notifyLibraryItemsInstalled,
-} from "./events";
+import { notifyLibraryConfigUpdated, notifyLibraryItemsInstalled } from "./events";
 import type { SavedLibrary } from "./types";
 
 export async function getSavedLibraries(): Promise<SavedLibrary[]> {
@@ -24,9 +21,7 @@ export async function getSavedLibraries(): Promise<SavedLibrary[]> {
 }
 
 /** Upsert the metadata bookmark for a library (content is managed separately). */
-export async function saveLibraryToConfig(
-    library: SavedLibrary,
-): Promise<void> {
+export async function saveLibraryToConfig(library: SavedLibrary): Promise<void> {
     if (typeof window === "undefined") return;
     const saved = await getSavedLibraries();
     const next = saved.filter((lib) => lib.id !== library.id);
@@ -59,10 +54,7 @@ export async function saveLibraryContent(
 
 export async function removeLibraryFromConfig(id: string): Promise<void> {
     const saved = await getSavedLibraries();
-    localStorage.setItem(
-        SAVED_LIBRARIES_KEY,
-        JSON.stringify(saved.filter((lib) => lib.id !== id)),
-    );
+    localStorage.setItem(SAVED_LIBRARIES_KEY, JSON.stringify(saved.filter((lib) => lib.id !== id)));
     notifyLibraryConfigUpdated();
 }
 
@@ -73,9 +65,7 @@ export async function getUserLibrary(): Promise<LibraryItem[]> {
     return Array.isArray(parsed) ? parsed : [];
 }
 
-export async function setUserLibrary(
-    items: readonly LibraryItem[],
-): Promise<void> {
+export async function setUserLibrary(items: readonly LibraryItem[]): Promise<void> {
     localStorage.setItem(USER_LIBRARY_KEY, JSON.stringify(items));
 }
 
@@ -87,9 +77,7 @@ let installQueue: Promise<void> = Promise.resolve();
  * Install library items: merge them into the persisted user library (deduped)
  * and notify any mounted canvas to merge them into the editor library.
  */
-export function installLibraryItems(
-    items: readonly LibraryItem[],
-): Promise<void> {
+export function installLibraryItems(items: readonly LibraryItem[]): Promise<void> {
     if (!Array.isArray(items) || items.length === 0) {
         return Promise.resolve();
     }

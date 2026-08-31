@@ -6,12 +6,7 @@ import { Icon } from "@astryxdesign/core/Icon";
 import { VStack } from "@astryxdesign/core/Stack";
 import { Text } from "@astryxdesign/core/Text";
 import { TextInput } from "@astryxdesign/core/TextInput";
-import {
-    createFileRoute,
-    redirect,
-    useNavigate,
-    useRouter,
-} from "@tanstack/react-router";
+import { createFileRoute, redirect, useNavigate, useRouter } from "@tanstack/react-router";
 import { LockKeyhole, PenTool, User } from "lucide-react";
 import { useState } from "react";
 import { getCurrentUser, signIn, signUp } from "#/lib/session";
@@ -45,8 +40,7 @@ function LoginPage() {
     }
 
     const usernameInvalid = usernameError(username);
-    const showUsernameError =
-        (usernameTouched || submitAttempted) && usernameInvalid;
+    const showUsernameError = (usernameTouched || submitAttempted) && usernameInvalid;
 
     async function handleSubmit() {
         setBusy(true);
@@ -72,9 +66,7 @@ function LoginPage() {
             await navigate({ to: "/" });
         } catch (cause) {
             setError(
-                cause instanceof Error
-                    ? cause.message
-                    : "Something went wrong. Please try again.",
+                cause instanceof Error ? cause.message : "Something went wrong. Please try again.",
             );
         } finally {
             setBusy(false);
@@ -127,18 +119,12 @@ function LoginPage() {
                             placeholder="••••••••"
                             startIcon={<Icon icon={LockKeyhole} size="sm" />}
                             isRequired
-                            status={
-                                error
-                                    ? { type: "error", message: error }
-                                    : undefined
-                            }
+                            status={error ? { type: "error", message: error } : undefined}
                         />
                     </VStack>
 
                     <Button
-                        label={
-                            mode === "signin" ? "Sign in" : "Create an account"
-                        }
+                        label={mode === "signin" ? "Sign in" : "Create an account"}
                         onClick={handleSubmit}
                         isLoading={busy}
                         width="100%"
@@ -150,9 +136,7 @@ function LoginPage() {
                                 : "Already have an account? Sign in"
                         }
                         variant="ghost"
-                        onClick={() =>
-                            switchMode(mode === "signin" ? "signup" : "signin")
-                        }
+                        onClick={() => switchMode(mode === "signin" ? "signup" : "signin")}
                         isDisabled={busy}
                         width="100%"
                     />

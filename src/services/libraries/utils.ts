@@ -1,9 +1,5 @@
 import type { LibraryItem } from "@excalidraw/excalidraw/types";
-import type {
-    ExcalidrawLibrary,
-    ExcalidrawLibraryFile,
-    SavedLibrary,
-} from "./types";
+import type { ExcalidrawLibrary, ExcalidrawLibraryFile, SavedLibrary } from "./types";
 
 /** Number of items shown for a saved library (names first, content as fallback). */
 export function libraryItemCount(library: SavedLibrary): number {
@@ -52,9 +48,7 @@ export async function toLibraryItems(
                 .filter(Boolean)
                 .sort()
                 .join(",");
-            const suffix = elementIds
-                ? hashString(elementIds)
-                : hashString(`${libraryId}${id}`);
+            const suffix = elementIds ? hashString(elementIds) : hashString(`${libraryId}${id}`);
 
             return {
                 id: `${libraryId}-${suffix}`,
@@ -80,8 +74,6 @@ export function searchLibraries(
         (lib) =>
             lib.name.toLowerCase().includes(lowerQuery) ||
             lib.description.toLowerCase().includes(lowerQuery) ||
-            lib.authors.some((author) =>
-                author.name.toLowerCase().includes(lowerQuery),
-            ),
+            lib.authors.some((author) => author.name.toLowerCase().includes(lowerQuery)),
     );
 }

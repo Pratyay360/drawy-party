@@ -6,12 +6,7 @@ import { HStack, VStack } from "@astryxdesign/core/Stack";
 import { Text } from "@astryxdesign/core/Text";
 import { Loader2, RefreshCw } from "lucide-react";
 import { useEffect, useState } from "react";
-import {
-    installUpdate,
-    onUpdateAvailable,
-    skipUpdate,
-    type UpdateInfo,
-} from "../updater.ts";
+import { installUpdate, onUpdateAvailable, skipUpdate, type UpdateInfo } from "../updater.ts";
 
 export function UpdatePrompt() {
     const [update, setUpdate] = useState<UpdateInfo | null>(null);
@@ -60,13 +55,10 @@ export function UpdatePrompt() {
                         <LayoutContent padding={4}>
                             <VStack gap={2}>
                                 <Text>
-                                    A new version of Drawy is available. Update
-                                    to {update.version}?
+                                    A new version of Drawy is available. Update to {update.version}?
                                 </Text>
                                 {update.notes ? (
-                                    <Text type="supporting">
-                                        {update.notes}
-                                    </Text>
+                                    <Text type="supporting">{update.notes}</Text>
                                 ) : null}
                             </VStack>
                         </LayoutContent>
@@ -81,19 +73,10 @@ export function UpdatePrompt() {
                                     isDisabled={installing}
                                 />
                                 <Button
-                                    label={
-                                        installing
-                                            ? "Installing..."
-                                            : "Update Now"
-                                    }
+                                    label={installing ? "Installing..." : "Update Now"}
                                     variant="primary"
                                     icon={
-                                        <Icon
-                                            icon={
-                                                installing ? Loader2 : RefreshCw
-                                            }
-                                            size="sm"
-                                        />
+                                        <Icon icon={installing ? Loader2 : RefreshCw} size="sm" />
                                     }
                                     onClick={handleInstall}
                                     isLoading={installing}

@@ -2,20 +2,23 @@ import type { BinaryFiles } from "@excalidraw/excalidraw/types";
 import { useNavigate } from "@tanstack/react-router";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useCanvasStore } from "#/stores/canvas";
-import {
-    loadCanvas,
-    sanitizeExcalidrawAppState,
-    saveCanvas,
-} from "../../services/canvases";
+import { loadCanvas, sanitizeExcalidrawAppState, saveCanvas } from "../../services/canvases";
 import { getUserLibrary } from "../../services/libraries";
 import { pruneUnusedFiles } from "../../utils/assets";
-import {
-    CanvasRealtime,
-    mergeElements,
-    type ScenePayload,
-} from "../../utils/canvas-realtime";
+import { CanvasRealtime, mergeElements, type ScenePayload } from "../../utils/canvas-realtime";
 import { subscribeCanvasEvents } from "../../utils/realtime";
 import { getPersistentAppState } from "./utils";
+
+function withTimeout<T>(promise: Promise<T>, ms: number, label: string): Promise<T> {
+    let timer: ReturnType<typeof setTimeout>;
+    const timeout = new Promise<never>((_, reject) => {
+        timer = setTimeout(
+            () => reject(new Error(`${label} timed out after ${ms}ms — slow network`)),
+            ms,
+        );
+    });
+    return Promise.race([promise, timeout]).finally(() => clearTimeout(timer)) as Promise<T>;
+}
 
 interface UseCanvasLifecycleOptions {
     id: string;
@@ -26,22 +29,26 @@ export function useCanvasLifecycle({ id }: UseCanvasLifecycleOptions) {
 
     const canvasData = useCanvasStore((s) => s.canvasData);
     const loading = useCanvasStore((s) => s.loading);
+    const loadError = useCanvasStore((s) => s.loadError);
     const isChangingCanvas = useCanvasStore((s) => s.isChangingCanvas);
     const elements = useCanvasStore((s) => s.elements);
     const appState = useCanvasStore((s) => s.appState);
     const excalidrawAPI = useCanvasStore((s) => s.excalidrawAPI);
     const excalidrawModule = useCanvasStore((s) => s.excalidrawModule);
+    const moduleError = useCanvasStore((s) => s.moduleError);
     const saveStatus = useCanvasStore((s) => s.saveStatus);
     const collaborators = useCanvasStore((s) => s.collaborators);
     const username = useCanvasStore((s) => s.username);
     const {
         setCanvasData,
         setLoading,
+        setLoadError,
         setIsChangingCanvas,
         setElements,
         setAppState,
         setExcalidrawAPI,
         setExcalidrawModule,
+        setModuleError,
         setSaveStatus,
         setCollaborators,
         reset: resetCanvas,
@@ -74,33 +81,50 @@ export function useCanvasLifecycle({ id }: UseCanvasLifecycleOptions) {
         let cancelled = false;
         (async () => {
             try {
-                const mod = await import("@excalidraw/excalidraw");
+                setModuleError(null);
+                const mod = await withTimeout(
+                    import("@excalidraw/excalidraw"),
+                    15000,
+                    "Loading editor",
+                );
                 await import("@excalidraw/excalidraw/index.css");
-                if (!cancelled) setExcalidrawModule(mod);
+                if (!cancelled) {
+                    setExcalidrawModule(mod);
+                    setModuleError(null);
+                }
             } catch (err) {
                 console.error("Failed to load Excalidraw:", err);
+                if (!cancelled) {
+                    setModuleError(
+                        err instanceof Error
+                            ? err.message
+                            : "Failed to load editor — slow network, please retry",
+                    );
+                }
             }
         })();
         return () => {
             cancelled = true;
         };
-    }, [setExcalidrawModule]);
+    }, [setExcalidrawModule, setModuleError]);
 
     // --- Fetch canvas ---
+    const fetchSeqRef = useRef(0);
     const fetchCanvas = useCallback(
         async (canvasId: string, isInitialMount: boolean) => {
+            const seq = ++fetchSeqRef.current;
             if (isInitialMount) {
                 setLoading(true);
             } else {
                 setIsChangingCanvas(true);
             }
+            setLoadError(null);
 
             try {
-                const data = await loadCanvas(canvasId);
+                const data = await withTimeout(loadCanvas(canvasId), 12000, "Loading canvas");
+                if (seq !== fetchSeqRef.current) return;
                 if (data) {
-                    const sanitizedAppState = sanitizeExcalidrawAppState(
-                        data.appState,
-                    );
+                    const sanitizedAppState = sanitizeExcalidrawAppState(data.appState);
                     const resolvedElements = data.elements || [];
                     const resolvedFiles = data.files || {};
 
@@ -112,6 +136,7 @@ export function useCanvasLifecycle({ id }: UseCanvasLifecycleOptions) {
                     });
                     setElements(resolvedElements);
                     setAppState(sanitizedAppState);
+                    setLoadError(null);
 
                     lastSavedData.current = {
                         elements: resolvedElements.map((e) => ({
@@ -122,13 +147,8 @@ export function useCanvasLifecycle({ id }: UseCanvasLifecycleOptions) {
                     };
 
                     if (excalidrawAPI) {
-                        if (
-                            resolvedFiles &&
-                            Object.keys(resolvedFiles).length > 0
-                        ) {
-                            excalidrawAPI.addFiles(
-                                Object.values(resolvedFiles),
-                            );
+                        if (resolvedFiles && Object.keys(resolvedFiles).length > 0) {
+                            excalidrawAPI.addFiles(Object.values(resolvedFiles));
                         }
                         // SAFETY: sanitizedAppState is Partial<AppState> produced by sanitizeExcalidrawAppState.
                         excalidrawAPI.updateScene({
@@ -142,8 +162,15 @@ export function useCanvasLifecycle({ id }: UseCanvasLifecycleOptions) {
                     void navigate({ to: "/" });
                 }
             } catch (error) {
+                if (seq !== fetchSeqRef.current) return;
                 console.error("Failed to load canvas:", error);
+                setLoadError(
+                    error instanceof Error
+                        ? error.message
+                        : "Failed to load canvas — check network and retry",
+                );
             } finally {
+                if (seq !== fetchSeqRef.current) return;
                 if (isInitialMount) {
                     setLoading(false);
                 } else {
@@ -158,6 +185,7 @@ export function useCanvasLifecycle({ id }: UseCanvasLifecycleOptions) {
             setElements,
             setAppState,
             setLoading,
+            setLoadError,
             setIsChangingCanvas,
         ],
     );
@@ -231,19 +259,19 @@ export function useCanvasLifecycle({ id }: UseCanvasLifecycleOptions) {
 
     // --- Auto-save ---
     useEffect(() => {
-        if (loading || isChangingCanvas || !id || saveStatus !== "unsaved")
-            return;
+        if (loading || isChangingCanvas || !id || saveStatus !== "unsaved") return;
 
         const timer = setTimeout(async () => {
             setSaveStatus("saving");
             isSavingRef.current = true;
             try {
-                const prunedFiles = pruneUnusedFiles(
-                    filesRef.current,
-                    elements,
-                );
+                const prunedFiles = pruneUnusedFiles(filesRef.current, elements);
                 filesRef.current = prunedFiles;
-                await saveCanvas(id, elements, appState, prunedFiles);
+                await withTimeout(
+                    saveCanvas(id, elements, appState, prunedFiles),
+                    12000,
+                    "Saving canvas",
+                );
                 setSaveStatus("saved");
                 realtimeRef.current?.broadcastSaved();
             } catch (error) {
@@ -255,15 +283,7 @@ export function useCanvasLifecycle({ id }: UseCanvasLifecycleOptions) {
         }, 1500);
 
         return () => clearTimeout(timer);
-    }, [
-        elements,
-        appState,
-        id,
-        loading,
-        isChangingCanvas,
-        saveStatus,
-        setSaveStatus,
-    ]);
+    }, [elements, appState, id, loading, isChangingCanvas, saveStatus, setSaveStatus]);
 
     // --- Reset store state on unmount ---
     useEffect(() => {
@@ -277,11 +297,13 @@ export function useCanvasLifecycle({ id }: UseCanvasLifecycleOptions) {
         // State
         canvasData,
         loading,
+        loadError,
         isChangingCanvas,
         elements,
         appState,
         excalidrawAPI,
         excalidrawModule,
+        moduleError,
         saveStatus,
         collaborators,
         username,
@@ -301,6 +323,8 @@ export function useCanvasLifecycle({ id }: UseCanvasLifecycleOptions) {
         setSaveStatus,
         setIsEditingTitle: useCanvasStore.getState().setIsEditingTitle,
         setTitleInput: useCanvasStore.getState().setTitleInput,
+        setLoadError,
+        setModuleError,
         // Functions
         fetchCanvas,
     };

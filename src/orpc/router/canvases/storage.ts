@@ -16,9 +16,7 @@ export const uploadAsset = base
             base64Data: z.string(),
         }),
     )
-    .output(
-        z.object({ fileId: z.string(), url: z.string(), mimeType: z.string() }),
-    )
+    .output(z.object({ fileId: z.string(), url: z.string(), mimeType: z.string() }))
     .handler(async ({ input, context }) => {
         const username = context.user?.username;
         if (!username)
@@ -32,8 +30,7 @@ export const uploadAsset = base
             .where(eq(canvases.id, input.canvasId))
             .limit(1);
 
-        if (!existing)
-            throw new ORPCError("NOT_FOUND", { message: "Canvas not found" });
+        if (!existing) throw new ORPCError("NOT_FOUND", { message: "Canvas not found" });
 
         const shared = parseCanvasAppState(existing.appState).sharedWith;
         if (existing.userId !== username && !shared.includes(username)) {

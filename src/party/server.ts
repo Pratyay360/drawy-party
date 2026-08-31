@@ -40,9 +40,7 @@ function toBytes(data: ArrayBuffer | ArrayBufferView): Uint8Array {
 }
 
 /** Normalize any binary frame to a Uint8Array, awaiting Blobs. */
-async function toBytesAsync(
-    data: ArrayBuffer | ArrayBufferView | Blob,
-): Promise<Uint8Array> {
+async function toBytesAsync(data: ArrayBuffer | ArrayBufferView | Blob): Promise<Uint8Array> {
     if (isBlobLike(data)) return new Uint8Array(await data.arrayBuffer());
     return toBytes(data);
 }
@@ -75,10 +73,7 @@ function createMessageReceiver(
                     const expected = start;
                     chunks = null;
                     start = null;
-                    const size = batch.reduce(
-                        (sum, c) => sum + c.byteLength,
-                        0,
-                    );
+                    const size = batch.reduce((sum, c) => sum + c.byteLength, 0);
                     if (
                         !failed &&
                         expected.id === marker.id &&
@@ -119,10 +114,7 @@ function createMessageReceiver(
  * "Unexpected end of array". They are safe to drop — the next sync round
  * will reconcile state. */
 function isTruncatedUpdate(error: unknown): boolean {
-    return (
-        error instanceof Error &&
-        error.message.includes("Unexpected end of array")
-    );
+    return error instanceof Error && error.message.includes("Unexpected end of array");
 }
 
 interface Client {
@@ -141,10 +133,7 @@ export default class EditorServer implements Party.Server {
 
     constructor(public room: Party.Room) {}
 
-    getConnectionTags(
-        _connection: Party.Connection,
-        context: Party.ConnectionContext,
-    ) {
+    getConnectionTags(_connection: Party.Connection, context: Party.ConnectionContext) {
         const kind = new URL(context.request.url).searchParams.get("kind");
         return kind ? [kind] : [];
     }
@@ -158,8 +147,7 @@ export default class EditorServer implements Party.Server {
         try {
             // Connection extends WebSocket; binaryType may be absent on
             // some runtimes, so guard with an optional cast.
-            (conn as unknown as { binaryType?: string }).binaryType =
-                "arraybuffer";
+            (conn as unknown as { binaryType?: string }).binaryType = "arraybuffer";
         } catch {
             // Some runtimes don't expose binaryType; toBytesAsync handles Blobs.
         }
@@ -252,8 +240,7 @@ export default class EditorServer implements Party.Server {
                 method: "POST",
                 body: JSON.stringify({
                     room: this.room.id,
-                    count: Array.from(this.room.getConnections("presence"))
-                        .length,
+                    count: Array.from(this.room.getConnections("presence")).length,
                 }),
             });
         } catch (e) {
@@ -261,11 +248,7 @@ export default class EditorServer implements Party.Server {
         }
     }
 
-    private broadcastToTag(
-        tag: string,
-        message: string | Uint8Array,
-        excludeId?: string,
-    ) {
+    private broadcastToTag(tag: string, message: string | Uint8Array, excludeId?: string) {
         for (const conn of this.room.getConnections(tag)) {
             if (conn.id === excludeId) continue;
             try {
@@ -311,8 +294,7 @@ export default class EditorServer implements Party.Server {
                     const client = this.clients.get(sender);
                     if (client) {
                         for (const id of added) client.controlledStates.add(id);
-                        for (const id of removed)
-                            client.controlledStates.delete(id);
+                        for (const id of removed) client.controlledStates.delete(id);
                     }
                 }
                 const encoder = encoding.createEncoder();
@@ -334,11 +316,7 @@ export default class EditorServer implements Party.Server {
             encoding.writeVarUint(encoder, messageSync);
             syncProtocol.writeUpdate(encoder, update);
             const bytes = encoding.toUint8Array(encoder);
-            this.broadcastToTag(
-                "presence",
-                bytes,
-                (origin as Party.Connection | null)?.id,
-            );
+            this.broadcastToTag("presence", bytes, (origin as Party.Connection | null)?.id);
         });
 
         this.doc = doc;
@@ -367,11 +345,7 @@ export default class EditorServer implements Party.Server {
             case messageAwareness: {
                 const update = decoding.readVarUint8Array(decoder);
                 try {
-                    awarenessProtocol.applyAwarenessUpdate(
-                        awareness,
-                        update,
-                        conn,
-                    );
+                    awarenessProtocol.applyAwarenessUpdate(awareness, update, conn);
                 } catch (e) {
                     if (isTruncatedUpdate(e)) {
                         // console.warn("[drawy] corrupted awareness update dropped");

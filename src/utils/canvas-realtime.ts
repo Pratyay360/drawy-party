@@ -8,10 +8,7 @@ import { SINGLETON_ROOM_ID } from "../party/rooms";
 const PARTYKIT_HOST = import.meta.env.VITE_PARTYKIT_URL!;
 
 function getPartykitHost(): string | undefined {
-    return (
-        PARTYKIT_HOST ??
-        (typeof window !== "undefined" ? window.location.host : undefined)
-    );
+    return PARTYKIT_HOST ?? (typeof window !== "undefined" ? window.location.host : undefined);
 }
 
 /** One color per session so the awareness badge and the cursor rendered from
@@ -34,8 +31,7 @@ export function mergeElements(
     for (const el of local) byId.set(el.id, el);
     for (const r of remote) {
         const existing = byId.get(r.id);
-        if (!existing || (r.version ?? 0) >= (existing.version ?? 0))
-            byId.set(r.id, r);
+        if (!existing || (r.version ?? 0) >= (existing.version ?? 0)) byId.set(r.id, r);
     }
     return [...byId.values()];
 }
@@ -79,10 +75,8 @@ export class CanvasRealtime {
         socket.onmessage = (event) => {
             try {
                 const data = JSON.parse(event.data);
-                if (data.type === "scene")
-                    this.sceneCbs.forEach((fn) => fn(data?.payload));
-                else if (data.type === "saved")
-                    this.savedCbs.forEach((fn) => fn());
+                if (data.type === "scene") this.sceneCbs.forEach((fn) => fn(data?.payload));
+                else if (data.type === "saved") this.savedCbs.forEach((fn) => fn());
             } catch {}
         };
         this.socket = socket;
@@ -140,10 +134,7 @@ export class CanvasRealtime {
         return this.provider?.awareness;
     }
 
-    broadcastScene(
-        elements: readonly ExcalidrawElement[],
-        files?: BinaryFiles,
-    ) {
+    broadcastScene(elements: readonly ExcalidrawElement[], files?: BinaryFiles) {
         if (!this.socket) return;
         this.pendingScene = {
             elements,
@@ -160,8 +151,7 @@ export class CanvasRealtime {
     }
 
     broadcastSaved() {
-        if (this.socket)
-            this.socket.send(JSON.stringify({ type: "saved", payload: {} }));
+        if (this.socket) this.socket.send(JSON.stringify({ type: "saved", payload: {} }));
     }
 
     onScene(cb: SceneCb): () => void {
@@ -176,8 +166,7 @@ export class CanvasRealtime {
         this.presenceCbs.add(cb);
         const cnt = this.provider?.awareness.getStates().size;
         if (cnt !== undefined && cnt > 0) cb(cnt);
-        else if (Object.keys(this.lastRooms).length > 0)
-            cb(this.lastRooms[this.canvasId] ?? 0);
+        else if (Object.keys(this.lastRooms).length > 0) cb(this.lastRooms[this.canvasId] ?? 0);
         return () => this.presenceCbs.delete(cb);
     }
 
@@ -219,8 +208,7 @@ function ensureGlobalSocket(): PartySocket | null {
     socket.onmessage = (event) => {
         try {
             const data = JSON.parse(event.data);
-            if (data.type === "canvas-list-changed")
-                globalListeners.forEach((fn) => fn());
+            if (data.type === "canvas-list-changed") globalListeners.forEach((fn) => fn());
         } catch {}
     };
     socket.onopen = () => {

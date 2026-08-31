@@ -28,10 +28,7 @@ import { useCanvasStore } from "#/stores/canvas";
 import { useUIStore } from "#/stores/ui";
 import { useTheme } from "../../hooks/usetheme";
 import { updateCanvasTitle } from "../../services/canvases";
-import {
-    onLibraryItemsInstalled,
-    setUserLibrary,
-} from "../../services/libraries";
+import { onLibraryItemsInstalled, setUserLibrary } from "../../services/libraries";
 import { LibraryPanelTab } from "../library-panel-tab";
 import { Sidebar } from "../sidebar";
 import { useCanvasHandlers } from "./use-canvas-handlers";
@@ -46,10 +43,7 @@ interface CanvasEditorProps {
     username?: string;
 }
 
-export function CanvasEditor({
-    id,
-    username: propUsername,
-}: CanvasEditorProps) {
+export function CanvasEditor({ id, username: propUsername }: CanvasEditorProps) {
     const navigate = useNavigate();
     const { theme } = useTheme();
 
@@ -89,17 +83,13 @@ export function CanvasEditor({
     }, [propUsername, setUsername]);
 
     // --- Library change handler ---
-    const librarySaveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(
+    const librarySaveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+    const pendingLibraryRef = useRef<import("@excalidraw/excalidraw/types").LibraryItem[] | null>(
         null,
     );
-    const pendingLibraryRef = useRef<
-        import("@excalidraw/excalidraw/types").LibraryItem[] | null
-    >(null);
 
     const handleLibraryChange = useCallback(
-        (
-            items: readonly import("@excalidraw/excalidraw/types").LibraryItem[],
-        ) => {
+        (items: readonly import("@excalidraw/excalidraw/types").LibraryItem[]) => {
             pendingLibraryRef.current = [...items];
             if (librarySaveTimerRef.current !== null) {
                 globalThis.clearTimeout(librarySaveTimerRef.current);
@@ -144,7 +134,17 @@ export function CanvasEditor({
     const handleTitleSave = useCallback(async () => {
         if (!id || !titleInput.trim()) return;
         try {
-            await updateCanvasTitle(id, titleInput.trim());
+            const withTimeout = <T,>(p: Promise<T>) =>
+                Promise.race([
+                    p,
+                    new Promise<never>((_, rej) =>
+                        setTimeout(
+                            () => rej(new Error("Saving title timed out — slow network")),
+                            12000,
+                        ),
+                    ),
+                ]);
+            await withTimeout(updateCanvasTitle(id, titleInput.trim()));
             if (lifecycle.canvasData) {
                 lifecycle.setCanvasData({
                     ...lifecycle.canvasData,
@@ -156,13 +156,7 @@ export function CanvasEditor({
         } catch (error) {
             console.error("Failed to update title:", error);
         }
-    }, [
-        id,
-        titleInput,
-        lifecycle.canvasData,
-        lifecycle.setCanvasData,
-        setIsEditingTitle,
-    ]);
+    }, [id, titleInput, lifecycle.canvasData, lifecycle.setCanvasData, setIsEditingTitle]);
 
     const handleTitleKeyDown = useCallback(
         (e: React.KeyboardEvent) => {
@@ -173,22 +167,62 @@ export function CanvasEditor({
                 setIsEditingTitle(false);
             }
         },
-        [
-            handleTitleSave,
-            lifecycle.canvasData?.title,
-            setTitleInput,
-            setIsEditingTitle,
-        ],
+        [handleTitleSave, lifecycle.canvasData?.title, setTitleInput, setIsEditingTitle],
     );
 
-    // --- Loading state ---
+    // --- Loading / error states (slow-network aware) ---
     if (lifecycle.loading) {
         return (
             <AppShell contentPadding={0} sideNav={<Sidebar />}>
                 <Center height="100%">
                     <VStack gap={2} hAlign="center">
                         <Icon icon={Loader2} size="lg" />
-                        <Text type="supporting">Loading...</Text>
+                        <Text type="supporting">Loading canvas…</Text>
+                        <Text type="supporting">Slow network — hang tight</Text>
+                    </VStack>
+                </Center>
+            </AppShell>
+        );
+    }
+
+    if (lifecycle.loadError) {
+        return (
+            <AppShell contentPadding={0} sideNav={<Sidebar />}>
+                <Center height="100%">
+                    <VStack gap={3} hAlign="center" maxWidth={400}>
+                        <Text weight="medium">Failed to load canvas</Text>
+                        <Text type="supporting" justify="center">
+                            {lifecycle.loadError}
+                        </Text>
+                        <HStack gap={2}>
+                            <Button
+                                label="Retry"
+                                icon={<Icon icon={Loader2} size="sm" />}
+                                onClick={() => void lifecycle.fetchCanvas(id, true)}
+                            />
+                            <Button
+                                label="Back to workspace"
+                                variant="ghost"
+                                icon={<Icon icon={ArrowLeft} size="sm" />}
+                                onClick={() => navigate({ to: "/" })}
+                            />
+                        </HStack>
+                    </VStack>
+                </Center>
+            </AppShell>
+        );
+    }
+
+    if (lifecycle.moduleError) {
+        return (
+            <AppShell contentPadding={0} sideNav={<Sidebar />}>
+                <Center height="100%">
+                    <VStack gap={3} hAlign="center" maxWidth={400}>
+                        <Text weight="medium">Failed to load editor</Text>
+                        <Text type="supporting" justify="center">
+                            {lifecycle.moduleError}
+                        </Text>
+                        <Button label="Retry" onClick={() => globalThis.location.reload()} />
                     </VStack>
                 </Center>
             </AppShell>
@@ -224,10 +258,7 @@ export function CanvasEditor({
                                     />
                                 ) : (
                                     <Button
-                                        label={
-                                            lifecycle.canvasData?.title ||
-                                            "Untitled"
-                                        }
+                                        label={lifecycle.canvasData?.title || "Untitled"}
                                         variant="ghost"
                                         size="sm"
                                         icon={<Icon icon={Pencil} size="sm" />}
@@ -241,9 +272,7 @@ export function CanvasEditor({
                                 {lifecycle.collaborators >= 1 && (
                                     <Text type="supporting">
                                         {lifecycle.collaborators} active{" "}
-                                        {lifecycle.collaborators === 1
-                                            ? "user"
-                                            : "users"}
+                                        {lifecycle.collaborators === 1 ? "user" : "users"}
                                     </Text>
                                 )}
                                 <Text type="supporting">
@@ -258,12 +287,8 @@ export function CanvasEditor({
                                     variant="ghost"
                                     icon={<Icon icon={Save} size="sm" />}
                                     tooltip="Save"
-                                    isLoading={
-                                        lifecycle.saveStatus === "saving"
-                                    }
-                                    isDisabled={
-                                        lifecycle.saveStatus === "saved"
-                                    }
+                                    isLoading={lifecycle.saveStatus === "saving"}
+                                    isDisabled={lifecycle.saveStatus === "saved"}
                                     onClick={handlers.handleManualSave}
                                 />
                                 <Button
@@ -276,10 +301,8 @@ export function CanvasEditor({
                                         openShareCanvas({
                                             canvasId: id,
                                             owner: lifecycle.canvasData.owner,
-                                            isOwner:
-                                                lifecycle.canvasData.isOwner,
-                                            sharedWith:
-                                                lifecycle.canvasData.sharedWith,
+                                            isOwner: lifecycle.canvasData.isOwner,
+                                            sharedWith: lifecycle.canvasData.sharedWith,
                                         })
                                     }
                                 />
@@ -293,17 +316,13 @@ export function CanvasEditor({
                             <div className="absolute inset-0">
                                 <Suspense fallback={null}>
                                     <RealtimeCursors
-                                        username={
-                                            lifecycle.username || "Anonymous"
-                                        }
+                                        username={lifecycle.username || "Anonymous"}
                                         awareness={lifecycle.awareness}
                                     />
                                 </Suspense>
                                 {lifecycle.excalidrawModule ? (
                                     <lifecycle.excalidrawModule.Excalidraw
-                                        excalidrawAPI={
-                                            lifecycle.setExcalidrawAPI
-                                        }
+                                        excalidrawAPI={lifecycle.setExcalidrawAPI}
                                         theme={theme}
                                         isCollaborating
                                         onPointerUpdate={() => {}}
@@ -312,67 +331,37 @@ export function CanvasEditor({
                                             appState: lifecycle.appState,
                                             files: lifecycle.filesRef.current,
                                             libraryItems:
-                                                lifecycle.initialLibraryItemsRef
-                                                    .current ?? undefined,
+                                                lifecycle.initialLibraryItemsRef.current ??
+                                                undefined,
                                         }}
-                                        onChange={
-                                            handlers.handleExcalidrawChange
-                                        }
+                                        onChange={handlers.handleExcalidrawChange}
                                         onLibraryChange={handleLibraryChange}
                                     >
                                         <lifecycle.excalidrawModule.MainMenu>
                                             <lifecycle.excalidrawModule.MainMenu.DefaultItems.ClearCanvas />
                                             <lifecycle.excalidrawModule.MainMenu.Separator />
                                             <lifecycle.excalidrawModule.MainMenu.Item
-                                                onSelect={
-                                                    handlers.handleExportToJSON
-                                                }
-                                                icon={
-                                                    <Icon
-                                                        icon={Download}
-                                                        size="sm"
-                                                    />
-                                                }
+                                                onSelect={handlers.handleExportToJSON}
+                                                icon={<Icon icon={Download} size="sm" />}
                                             >
                                                 Export File (.excalidraw)
                                             </lifecycle.excalidrawModule.MainMenu.Item>
                                             <lifecycle.excalidrawModule.MainMenu.Item
-                                                onSelect={
-                                                    handlers.handleImportFromJSON
-                                                }
-                                                icon={
-                                                    <Icon
-                                                        icon={Upload}
-                                                        size="sm"
-                                                    />
-                                                }
+                                                onSelect={handlers.handleImportFromJSON}
+                                                icon={<Icon icon={Upload} size="sm" />}
                                             >
                                                 Import File (.excalidraw)
                                             </lifecycle.excalidrawModule.MainMenu.Item>
                                             <lifecycle.excalidrawModule.MainMenu.Separator />
                                             <lifecycle.excalidrawModule.MainMenu.Item
-                                                onSelect={
-                                                    handlers.handleExportToPNG
-                                                }
-                                                icon={
-                                                    <Icon
-                                                        icon={Image}
-                                                        size="sm"
-                                                    />
-                                                }
+                                                onSelect={handlers.handleExportToPNG}
+                                                icon={<Icon icon={Image} size="sm" />}
                                             >
                                                 Export as PNG
                                             </lifecycle.excalidrawModule.MainMenu.Item>
                                             <lifecycle.excalidrawModule.MainMenu.Item
-                                                onSelect={
-                                                    handlers.handleExportToSVG
-                                                }
-                                                icon={
-                                                    <Icon
-                                                        icon={FileCode}
-                                                        size="sm"
-                                                    />
-                                                }
+                                                onSelect={handlers.handleExportToSVG}
+                                                icon={<Icon icon={FileCode} size="sm" />}
                                             >
                                                 Export as SVG
                                             </lifecycle.excalidrawModule.MainMenu.Item>
@@ -382,22 +371,15 @@ export function CanvasEditor({
                                         <lifecycle.excalidrawModule.WelcomeScreen>
                                             <lifecycle.excalidrawModule.WelcomeScreen.Center>
                                                 <lifecycle.excalidrawModule.WelcomeScreen.Center.Logo>
-                                                    <Icon
-                                                        icon={PenTool}
-                                                        size="lg"
-                                                    />
+                                                    <Icon icon={PenTool} size="lg" />
                                                 </lifecycle.excalidrawModule.WelcomeScreen.Center.Logo>
                                                 <lifecycle.excalidrawModule.WelcomeScreen.Center.Heading>
                                                     Drawy
                                                 </lifecycle.excalidrawModule.WelcomeScreen.Center.Heading>
                                                 <lifecycle.excalidrawModule.WelcomeScreen.Center.MenuItemHelp />
-                                                <Text
-                                                    type="supporting"
-                                                    justify="center"
-                                                >
-                                                    Sketch, add shapes, or use
-                                                    templates. Changes save
-                                                    automatically.
+                                                <Text type="supporting" justify="center">
+                                                    Sketch, add shapes, or use templates. Changes
+                                                    save automatically.
                                                 </Text>
                                             </lifecycle.excalidrawModule.WelcomeScreen.Center>
                                         </lifecycle.excalidrawModule.WelcomeScreen>
@@ -409,10 +391,7 @@ export function CanvasEditor({
                                                     title="Drawy libraries"
                                                     aria-label="Drawy libraries"
                                                 >
-                                                    <Icon
-                                                        icon={Layers}
-                                                        size="sm"
-                                                    />
+                                                    <Icon icon={Layers} size="sm" />
                                                 </lifecycle.excalidrawModule.Sidebar.TabTrigger>
                                             </lifecycle.excalidrawModule.DefaultSidebar.TabTriggers>
                                             <lifecycle.excalidrawModule.Sidebar.Tab tab="drawy-libraries">
@@ -420,12 +399,26 @@ export function CanvasEditor({
                                             </lifecycle.excalidrawModule.Sidebar.Tab>
                                         </lifecycle.excalidrawModule.DefaultSidebar>
                                     </lifecycle.excalidrawModule.Excalidraw>
+                                ) : lifecycle.moduleError ? (
+                                    <Center height="100%">
+                                        <VStack gap={2} hAlign="center" maxWidth={360}>
+                                            <Text weight="medium">Editor failed to load</Text>
+                                            <Text type="supporting" justify="center">
+                                                {lifecycle.moduleError}
+                                            </Text>
+                                            <Button
+                                                label="Retry"
+                                                onClick={() => globalThis.location.reload()}
+                                            />
+                                        </VStack>
+                                    </Center>
                                 ) : (
                                     <Center height="100%">
                                         <VStack gap={2} hAlign="center">
                                             <Icon icon={Loader2} size="lg" />
+                                            <Text type="supporting">Loading editor...</Text>
                                             <Text type="supporting">
-                                                Loading editor...
+                                                Slow network — this can take a moment
                                             </Text>
                                         </VStack>
                                     </Center>

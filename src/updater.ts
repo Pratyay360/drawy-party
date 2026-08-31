@@ -8,9 +8,7 @@ export interface UpdateInfo {
  * These stubs keep the (optional) update prompt wired up without
  * ever firing; a native/desktop build can implement them for real.
  */
-export function onUpdateAvailable(
-    _callback: (info: UpdateInfo) => void,
-): () => void {
+export function onUpdateAvailable(_callback: (info: UpdateInfo) => void): () => void {
     return () => {};
 }
 

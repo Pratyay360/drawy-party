@@ -17,13 +17,8 @@ interface LibraryItemThumbnailProps {
     elements: readonly ExcalidrawElement[];
 }
 
-export function LibraryItemThumbnail({
-    itemId,
-    elements,
-}: LibraryItemThumbnailProps) {
-    const [url, setUrl] = useState<string | null>(
-        () => thumbnailUrlCache.get(itemId) ?? null,
-    );
+export function LibraryItemThumbnail({ itemId, elements }: LibraryItemThumbnailProps) {
+    const [url, setUrl] = useState<string | null>(() => thumbnailUrlCache.get(itemId) ?? null);
     const [failed, setFailed] = useState(false);
 
     useEffect(() => {
@@ -57,10 +52,7 @@ export function LibraryItemThumbnail({
                 thumbnailUrlCache.set(itemId, dataUrl);
                 setUrl(dataUrl);
             } catch (error) {
-                console.error(
-                    "Failed to render library item thumbnail:",
-                    error,
-                );
+                console.error("Failed to render library item thumbnail:", error);
                 if (!cancelled) setFailed(true);
             }
         });

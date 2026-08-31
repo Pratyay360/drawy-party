@@ -82,20 +82,17 @@ if (typeof window === "undefined") {
     }
 
     if (!("EXCALIDRAW_EXPORT_SOURCE" in globalThis)) {
-        (globalThis as any).EXCALIDRAW_EXPORT_SOURCE = (globalThis as any)
-            .location?.origin;
+        (globalThis as any).EXCALIDRAW_EXPORT_SOURCE = (globalThis as any).location?.origin;
     }
     if (!("devicePixelRatio" in globalThis)) {
         (globalThis as any).devicePixelRatio = 1;
     }
     if (!("requestAnimationFrame" in globalThis)) {
-        (globalThis as any).requestAnimationFrame = (
-            callback: FrameRequestCallback,
-        ) => setTimeout(() => callback(Date.now()), 0);
+        (globalThis as any).requestAnimationFrame = (callback: FrameRequestCallback) =>
+            setTimeout(() => callback(Date.now()), 0);
     }
     if (!("cancelAnimationFrame" in globalThis)) {
-        (globalThis as any).cancelAnimationFrame = (id: number) =>
-            clearTimeout(id);
+        (globalThis as any).cancelAnimationFrame = (id: number) => clearTimeout(id);
     }
     if (!("matchMedia" in globalThis)) {
         (globalThis as any).matchMedia = () => ({
@@ -112,18 +109,13 @@ if (typeof window === "undefined") {
         (globalThis as any).Element = ElementStub;
     }
     if (!("HTMLElement" in globalThis)) {
-        (globalThis as any).HTMLElement = class HTMLElement extends (
-            ElementStub
-        ) {};
+        (globalThis as any).HTMLElement = class HTMLElement extends ElementStub {};
     }
     if (!("SVGElement" in globalThis)) {
-        (globalThis as any).SVGElement = class SVGElement extends (
-            ElementStub
-        ) {};
+        (globalThis as any).SVGElement = class SVGElement extends ElementStub {};
     }
     if (!("HTMLCanvasElement" in globalThis)) {
-        (globalThis as any).HTMLCanvasElement =
-            class HTMLCanvasElement extends ElementStub {};
+        (globalThis as any).HTMLCanvasElement = class HTMLCanvasElement extends ElementStub {};
     }
 }
 export default function () {

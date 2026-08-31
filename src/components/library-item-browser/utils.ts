@@ -5,9 +5,7 @@ export function getItemName(
     index: number,
     itemNames: string[],
 ): string {
-    return (
-        item?.name?.trim() || itemNames?.[index]?.trim() || `Item ${index + 1}`
-    );
+    return item?.name?.trim() || itemNames?.[index]?.trim() || `Item ${index + 1}`;
 }
 
 export function getItemSearchText(

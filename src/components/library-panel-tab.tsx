@@ -52,9 +52,7 @@ export function LibraryPanelTab() {
                                 startContent={
                                     library.preview ? (
                                         <img
-                                            src={getLibraryAssetUrl(
-                                                library.preview,
-                                            )}
+                                            src={getLibraryAssetUrl(library.preview)}
                                             alt=""
                                             className="h-7 w-9 rounded object-cover"
                                         />
@@ -69,8 +67,7 @@ export function LibraryPanelTab() {
                     </List>
                 ) : (
                     <Text type="supporting">
-                        No saved libraries yet. Save one to browse and use its
-                        items on your canvas.
+                        No saved libraries yet. Save one to browse and use its items on your canvas.
                     </Text>
                 )}
             </StackItem>

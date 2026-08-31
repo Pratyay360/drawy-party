@@ -28,10 +28,7 @@ interface UIState {
     closeLibraryBrowser: () => void;
 
     openShareCanvas: (
-        payload: Pick<
-            ShareModalState,
-            "canvasId" | "owner" | "isOwner" | "sharedWith"
-        >,
+        payload: Pick<ShareModalState, "canvasId" | "owner" | "isOwner" | "sharedWith">,
     ) => void;
     closeShareCanvas: () => void;
 
@@ -90,12 +87,9 @@ export const useUIStore = create<UIState>((set) => ({
         set((s) => ({ shareModal: { ...s.shareModal, targetUser } })),
     setShareAvailableUsers: (availableUsers) =>
         set((s) => ({ shareModal: { ...s.shareModal, availableUsers } })),
-    setShareIsSharing: (isSharing) =>
-        set((s) => ({ shareModal: { ...s.shareModal, isSharing } })),
+    setShareIsSharing: (isSharing) => set((s) => ({ shareModal: { ...s.shareModal, isSharing } })),
     setShareUnsharingUser: (unsharingUser) =>
         set((s) => ({ shareModal: { ...s.shareModal, unsharingUser } })),
-    setShareErrorMsg: (errorMsg) =>
-        set((s) => ({ shareModal: { ...s.shareModal, errorMsg } })),
-    setShareCopied: (copied) =>
-        set((s) => ({ shareModal: { ...s.shareModal, copied } })),
+    setShareErrorMsg: (errorMsg) => set((s) => ({ shareModal: { ...s.shareModal, errorMsg } })),
+    setShareCopied: (copied) => set((s) => ({ shareModal: { ...s.shareModal, copied } })),
 }));

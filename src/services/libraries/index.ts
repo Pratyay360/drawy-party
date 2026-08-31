@@ -4,11 +4,7 @@
 export { fetchLibraries, fetchLibraryContent, getLibraryAssetUrl } from "./api";
 
 // Constants
-export {
-    LIBRARIES_API_URL,
-    SAVED_LIBRARIES_KEY,
-    USER_LIBRARY_KEY,
-} from "./constants";
+export { LIBRARIES_API_URL, SAVED_LIBRARIES_KEY, USER_LIBRARY_KEY } from "./constants";
 
 // Events
 export {
@@ -28,10 +24,6 @@ export {
     saveLibraryToConfig,
     setUserLibrary,
 } from "./storage";
-export type {
-    ExcalidrawLibrary,
-    ExcalidrawLibraryFile,
-    SavedLibrary,
-} from "./types";
+export type { ExcalidrawLibrary, ExcalidrawLibraryFile, SavedLibrary } from "./types";
 // Utils
 export { libraryItemCount, searchLibraries, toLibraryItems } from "./utils";

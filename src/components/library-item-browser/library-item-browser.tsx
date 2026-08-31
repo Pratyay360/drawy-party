@@ -9,13 +9,7 @@ import { Section } from "@astryxdesign/core/Section";
 import { HStack, VStack } from "@astryxdesign/core/Stack";
 import { Text } from "@astryxdesign/core/Text";
 import { TextInput } from "@astryxdesign/core/TextInput";
-import {
-    ArrowLeft,
-    CloudDownload,
-    Download,
-    RefreshCw,
-    Search,
-} from "lucide-react";
+import { ArrowLeft, CloudDownload, Download, RefreshCw, Search } from "lucide-react";
 import { useEffect, useMemo } from "react";
 import { useLibraryItemStore } from "#/stores/library-item";
 import type { SavedLibrary } from "../../services/libraries";
@@ -29,11 +23,7 @@ interface LibraryItemBrowserProps {
     onRefreshContent: () => Promise<void>;
 }
 
-export function LibraryItemBrowser({
-    library,
-    onBack,
-    onRefreshContent,
-}: LibraryItemBrowserProps) {
+export function LibraryItemBrowser({ library, onBack, onRefreshContent }: LibraryItemBrowserProps) {
     const query = useLibraryItemStore((s) => s.query);
     const refreshing = useLibraryItemStore((s) => s.refreshing);
     const setQuery = useLibraryItemStore((s) => s.setQuery);
@@ -42,9 +32,7 @@ export function LibraryItemBrowser({
     const hasContent = Array.isArray(library.items) && library.items.length > 0;
     const items = useMemo(() => {
         const raw = Array.isArray(library.items) ? library.items : [];
-        const itemNames = Array.isArray(library.item_names)
-            ? library.item_names
-            : [];
+        const itemNames = Array.isArray(library.item_names) ? library.item_names : [];
         const lowerQuery = query.trim().toLowerCase();
         return raw
             .map((item, index) => ({
@@ -100,9 +88,7 @@ export function LibraryItemBrowser({
                             {library.name}
                         </Heading>
                         <Text type="supporting">
-                            {hasContent
-                                ? `${library.items.length} items`
-                                : "No items"}
+                            {hasContent ? `${library.items.length} items` : "No items"}
                         </Text>
                     </HStack>
                     <Text type="supporting" maxLines={1}>
@@ -135,33 +121,17 @@ export function LibraryItemBrowser({
                     {items.length > 0 ? (
                         <Grid columns={{ minWidth: 160, max: 4 }} gap={3}>
                             {items.map(({ item, name }, index) => (
-                                <Card
-                                    key={item.id || `${library.id}-${index}`}
-                                    padding={2}
-                                >
+                                <Card key={item.id || `${library.id}-${index}`} padding={2}>
                                     <VStack gap={2}>
-                                        <Card
-                                            variant="muted"
-                                            height={110}
-                                            padding={1}
-                                        >
+                                        <Card variant="muted" height={110} padding={1}>
                                             <Center>
                                                 <LibraryItemThumbnail
-                                                    itemId={
-                                                        item.id ||
-                                                        `${library.id}-${index}`
-                                                    }
-                                                    elements={
-                                                        item.elements || []
-                                                    }
+                                                    itemId={item.id || `${library.id}-${index}`}
+                                                    elements={item.elements || []}
                                                 />
                                             </Center>
                                         </Card>
-                                        <Text
-                                            type="supporting"
-                                            maxLines={1}
-                                            justify="center"
-                                        >
+                                        <Text type="supporting" maxLines={1} justify="center">
                                             {name}
                                         </Text>
                                     </VStack>
@@ -179,12 +149,9 @@ export function LibraryItemBrowser({
                     <VStack gap={3} hAlign="center">
                         <Icon icon={CloudDownload} size="lg" />
                         <VStack gap={1} hAlign="center">
-                            <Text weight="medium">
-                                Content not downloaded yet
-                            </Text>
+                            <Text weight="medium">Content not downloaded yet</Text>
                             <Text type="supporting">
-                                Download this library to browse and use its
-                                items.
+                                Download this library to browse and use its items.
                             </Text>
                         </VStack>
                         <Button

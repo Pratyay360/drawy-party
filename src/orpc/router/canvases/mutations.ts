@@ -63,8 +63,7 @@ export const save = base
             .from(canvases)
             .where(eq(canvases.id, input.id))
             .limit(1);
-        if (!existing)
-            throw new ORPCError("NOT_FOUND", { message: "Canvas not found" });
+        if (!existing) throw new ORPCError("NOT_FOUND", { message: "Canvas not found" });
 
         const shared = parseCanvasAppState(existing.appState).sharedWith;
         if (existing.userId !== username && !shared.includes(username)) {
@@ -74,13 +73,12 @@ export const save = base
         }
 
         const ex = (
-            existing.appState && typeof existing.appState === "object"
-                ? existing.appState
-                : {}
+            existing.appState && typeof existing.appState === "object" ? existing.appState : {}
         ) as Record<string, unknown>;
-        const exFiles = (
-            ex.files && typeof ex.files === "object" ? ex.files : {}
-        ) as Record<string, unknown>;
+        const exFiles = (ex.files && typeof ex.files === "object" ? ex.files : {}) as Record<
+            string,
+            unknown
+        >;
 
         await db
             .update(canvases)
@@ -110,8 +108,7 @@ export const rename = base
             .from(canvases)
             .where(eq(canvases.id, input.id))
             .limit(1);
-        if (!existing)
-            throw new ORPCError("NOT_FOUND", { message: "Canvas not found" });
+        if (!existing) throw new ORPCError("NOT_FOUND", { message: "Canvas not found" });
 
         const shared = parseCanvasAppState(existing.appState).sharedWith;
         if (existing.userId !== username && !shared.includes(username)) {

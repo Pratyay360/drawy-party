@@ -14,9 +14,7 @@ export function getRouter() {
         defaultPreloadStaleTime: 0,
         defaultNotFoundComponent: () => <p>Not Found</p>,
         Wrap: ({ children }) => (
-            <QueryClientProvider client={context.queryClient}>
-                {children}
-            </QueryClientProvider>
+            <QueryClientProvider client={context.queryClient}>{children}</QueryClientProvider>
         ),
     });
 

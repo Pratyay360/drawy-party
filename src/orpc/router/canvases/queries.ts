@@ -27,17 +27,12 @@ export const list = base
                 message: "Not authenticated",
             });
 
-        const rows = await db
-            .select()
-            .from(canvases)
-            .orderBy(desc(canvases.updatedAt));
+        const rows = await db.select().from(canvases).orderBy(desc(canvases.updatedAt));
         return rows
             .filter(
                 (row) =>
                     row.userId === username ||
-                    parseCanvasAppState(row.appState).sharedWith.includes(
-                        username,
-                    ),
+                    parseCanvasAppState(row.appState).sharedWith.includes(username),
             )
             .map((row) => toMeta(row, username));
     });
@@ -67,11 +62,7 @@ export const get = base
                 message: "Not authenticated",
             });
 
-        const [row] = await db
-            .select()
-            .from(canvases)
-            .where(eq(canvases.id, input.id))
-            .limit(1);
+        const [row] = await db.select().from(canvases).where(eq(canvases.id, input.id)).limit(1);
         if (!row) return null;
 
         const shared = parseCanvasAppState(row.appState).sharedWith;

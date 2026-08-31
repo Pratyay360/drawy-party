@@ -5,11 +5,7 @@ import { Icon } from "@astryxdesign/core/Icon";
 import { HStack, VStack } from "@astryxdesign/core/Stack";
 import { Text } from "@astryxdesign/core/Text";
 import { BookmarkX, Eye, Library, RefreshCw } from "lucide-react";
-import {
-    getLibraryAssetUrl,
-    libraryItemCount,
-    type SavedLibrary,
-} from "../../services/libraries";
+import { getLibraryAssetUrl, libraryItemCount, type SavedLibrary } from "../../services/libraries";
 
 interface SavedLibraryCardProps {
     saved: SavedLibrary;
@@ -49,12 +45,7 @@ export function SavedLibraryCard({
                             className="h-10 w-20 shrink-0 rounded object-cover"
                         />
                     ) : (
-                        <Card
-                            variant="muted"
-                            width={80}
-                            height={40}
-                            padding={1}
-                        >
+                        <Card variant="muted" width={80} height={40} padding={1}>
                             <Center>
                                 <Icon icon={Library} size="sm" />
                             </Center>
@@ -65,8 +56,7 @@ export function SavedLibraryCard({
                             {saved.name}
                         </Text>
                         <Text type="supporting">
-                            {libraryItemCount(saved)} items ·{" "}
-                            {formatFetchedAt(saved.fetched_at)}
+                            {libraryItemCount(saved)} items · {formatFetchedAt(saved.fetched_at)}
                         </Text>
                     </VStack>
                 </HStack>

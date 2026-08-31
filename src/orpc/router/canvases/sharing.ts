@@ -39,8 +39,7 @@ export const share = base
             .from(canvases)
             .where(eq(canvases.id, input.id))
             .limit(1);
-        if (!canvas)
-            throw new ORPCError("NOT_FOUND", { message: "Canvas not found" });
+        if (!canvas) throw new ORPCError("NOT_FOUND", { message: "Canvas not found" });
         if (canvas.userId !== username)
             throw new ORPCError("FORBIDDEN", {
                 message: "Only the owner can manage sharing.",
@@ -76,8 +75,7 @@ export const unshare = base
             .from(canvases)
             .where(eq(canvases.id, input.id))
             .limit(1);
-        if (!canvas)
-            throw new ORPCError("NOT_FOUND", { message: "Canvas not found" });
+        if (!canvas) throw new ORPCError("NOT_FOUND", { message: "Canvas not found" });
         if (canvas.userId !== username)
             throw new ORPCError("FORBIDDEN", {
                 message: "Only the owner can manage sharing.",
@@ -98,14 +96,10 @@ export const unshare = base
             .where(eq(canvases.id, input.id));
     });
 
-export const listUsers = base
-    .output(z.array(z.string()))
-    .handler(async ({ context }) => {
-        const rows = await db
-            .select({ username: appUsers.username })
-            .from(appUsers)
-            .orderBy(asc(appUsers.username));
-        return rows
-            .map((u) => u.username)
-            .filter((u) => u !== context.user?.username);
-    });
+export const listUsers = base.output(z.array(z.string())).handler(async ({ context }) => {
+    const rows = await db
+        .select({ username: appUsers.username })
+        .from(appUsers)
+        .orderBy(asc(appUsers.username));
+    return rows.map((u) => u.username).filter((u) => u !== context.user?.username);
+});

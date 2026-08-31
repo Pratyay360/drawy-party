@@ -15,10 +15,7 @@ export async function compressDataUrl(
     }
 
     // Skip SVG as vector formats shouldn't be rasterized
-    if (
-        mimeType === "image/svg+xml" ||
-        dataURL.startsWith("data:image/svg+xml")
-    ) {
+    if (mimeType === "image/svg+xml" || dataURL.startsWith("data:image/svg+xml")) {
         return { dataURL, mimeType: "image/svg+xml" };
     }
 
@@ -80,19 +77,14 @@ export async function compressDataUrl(
 /**
  * Optimize all binary files by compressing large images and returning an updated dictionary.
  */
-export async function optimizeBinaryFiles(
-    files: BinaryFiles,
-): Promise<BinaryFiles> {
+export async function optimizeBinaryFiles(files: BinaryFiles): Promise<BinaryFiles> {
     if (!files || Object.keys(files).length === 0) return {};
 
     const optimized: BinaryFiles = {};
     const promises = Object.entries(files).map(async ([id, file]) => {
         if (!file?.dataURL) return;
         try {
-            const { dataURL, mimeType } = await compressDataUrl(
-                file.dataURL,
-                file.mimeType,
-            );
+            const { dataURL, mimeType } = await compressDataUrl(file.dataURL, file.mimeType);
             optimized[id] = {
                 ...file,
                 dataURL: dataURL as BinaryFileData["dataURL"],

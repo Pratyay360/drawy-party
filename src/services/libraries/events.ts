@@ -1,9 +1,6 @@
 import type { LibraryItem } from "@excalidraw/excalidraw/types";
 import { useUIStore } from "#/stores/ui";
-import {
-    LIBRARY_CONFIG_UPDATED_EVENT,
-    LIBRARY_ITEMS_INSTALLED_EVENT,
-} from "./constants";
+import { LIBRARY_CONFIG_UPDATED_EVENT, LIBRARY_ITEMS_INSTALLED_EVENT } from "./constants";
 
 export function notifyLibraryConfigUpdated() {
     globalThis.dispatchEvent(new Event(LIBRARY_CONFIG_UPDATED_EVENT));
@@ -11,14 +8,11 @@ export function notifyLibraryConfigUpdated() {
 
 export function onLibraryConfigUpdated(callback: () => void): () => void {
     globalThis.addEventListener(LIBRARY_CONFIG_UPDATED_EVENT, callback);
-    return () =>
-        globalThis.removeEventListener(LIBRARY_CONFIG_UPDATED_EVENT, callback);
+    return () => globalThis.removeEventListener(LIBRARY_CONFIG_UPDATED_EVENT, callback);
 }
 
 export function notifyLibraryItemsInstalled(items: readonly LibraryItem[]) {
-    globalThis.dispatchEvent(
-        new CustomEvent(LIBRARY_ITEMS_INSTALLED_EVENT, { detail: items }),
-    );
+    globalThis.dispatchEvent(new CustomEvent(LIBRARY_ITEMS_INSTALLED_EVENT, { detail: items }));
 }
 
 export function requestLibraryBrowse(libraryId: string | null): void {
@@ -34,6 +28,5 @@ export function onLibraryItemsInstalled(
         if (Array.isArray(detail)) callback(detail);
     };
     globalThis.addEventListener(LIBRARY_ITEMS_INSTALLED_EVENT, handler);
-    return () =>
-        globalThis.removeEventListener(LIBRARY_ITEMS_INSTALLED_EVENT, handler);
+    return () => globalThis.removeEventListener(LIBRARY_ITEMS_INSTALLED_EVENT, handler);
 }

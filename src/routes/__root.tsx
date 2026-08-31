@@ -1,9 +1,5 @@
 import type { QueryClient } from "@tanstack/react-query";
-import {
-    createRootRouteWithContext,
-    HeadContent,
-    Scripts,
-} from "@tanstack/react-router";
+import { createRootRouteWithContext, HeadContent, Scripts } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { AppThemeProvider } from "../components/app-theme-provider";
 import { GlobalDialogs } from "../components/global-dialogs";
@@ -38,8 +34,7 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
 });
 
 function Devtools() {
-    const [DevtoolsComponent, setDevtoolsComponent] =
-        useState<React.ComponentType | null>(null);
+    const [DevtoolsComponent, setDevtoolsComponent] = useState<React.ComponentType | null>(null);
 
     useEffect(() => {
         if (process.env.NODE_ENV !== "development") return;

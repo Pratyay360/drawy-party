@@ -48,9 +48,7 @@ export function LibraryTable({
                 </TableHeader>
                 <TableBody>
                     {filteredLibraries.map((library, index) => {
-                        const saved = savedLibraries.find(
-                            (lib) => lib.id === library.id,
-                        );
+                        const saved = savedLibraries.find((lib) => lib.id === library.id);
                         const saving = savingId === library.id;
                         return (
                             <TableRow
@@ -60,9 +58,7 @@ export function LibraryTable({
                                 <TableCell>
                                     {library.preview && (
                                         <img
-                                            src={getLibraryAssetUrl(
-                                                library.preview,
-                                            )}
+                                            src={getLibraryAssetUrl(library.preview)}
                                             alt={`${library.name} preview`}
                                             className="h-12 w-16 rounded object-cover"
                                         />
@@ -85,29 +81,16 @@ export function LibraryTable({
                                 </TableCell>
                                 <TableCell onClick={(e) => e.stopPropagation()}>
                                     <Button
-                                        label={
-                                            saved
-                                                ? `${libraryItemCount(saved)} items`
-                                                : "Save"
-                                        }
+                                        label={saved ? `${libraryItemCount(saved)} items` : "Save"}
                                         variant="ghost"
                                         size="sm"
                                         icon={
                                             saving ? (
-                                                <Icon
-                                                    icon={Loader2}
-                                                    size="sm"
-                                                />
+                                                <Icon icon={Loader2} size="sm" />
                                             ) : saved ? (
-                                                <Icon
-                                                    icon={BookmarkCheck}
-                                                    size="sm"
-                                                />
+                                                <Icon icon={BookmarkCheck} size="sm" />
                                             ) : (
-                                                <Icon
-                                                    icon={BookmarkPlus}
-                                                    size="sm"
-                                                />
+                                                <Icon icon={BookmarkPlus} size="sm" />
                                             )
                                         }
                                         isLoading={saving}
@@ -132,8 +115,8 @@ export function LibraryTable({
             )}
 
             <Text type="supporting">
-                {filteredLibraries.length} of {libraries.length} libraries ·{" "}
-                {savedLibraries.length} saved
+                {filteredLibraries.length} of {libraries.length} libraries · {savedLibraries.length}{" "}
+                saved
             </Text>
         </>
     );

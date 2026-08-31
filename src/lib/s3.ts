@@ -39,9 +39,7 @@ async function doUpload(body: Buffer): Promise<string> {
     try {
         result = JSON.parse(rawText);
     } catch {
-        throw new Error(
-            `imgcdn.dev returned non-JSON response (${response.status}): ${rawText}`,
-        );
+        throw new Error(`imgcdn.dev returned non-JSON response (${response.status}): ${rawText}`);
     }
 
     if (!response.ok) {

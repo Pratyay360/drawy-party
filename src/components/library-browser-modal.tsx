@@ -17,12 +17,7 @@ export function LibraryBrowserModal() {
     };
 
     return (
-        <Dialog
-            isOpen={isOpen}
-            onOpenChange={handleOpenChange}
-            width={880}
-            maxHeight="85vh"
-        >
+        <Dialog isOpen={isOpen} onOpenChange={handleOpenChange} width={880} maxHeight="85vh">
             <Layout
                 header={
                     <DialogHeader
@@ -33,10 +28,7 @@ export function LibraryBrowserModal() {
                 }
                 content={
                     <LayoutContent isScrollable padding={4}>
-                        <LibraryBrowser
-                            initialBrowseId={initialBrowseId}
-                            source="sidebar"
-                        />
+                        <LibraryBrowser initialBrowseId={initialBrowseId} source="sidebar" />
                     </LayoutContent>
                 }
             />

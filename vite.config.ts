@@ -12,9 +12,7 @@ export default defineConfig({
             const target = process.env.VITE_PARTYKIT_URL!;
             if (!target) return undefined;
             // Vite proxy expects a full URL; if only a host is provided, prefix with http://
-            const normalized = target.includes("://")
-                ? target
-                : `http://${target}`;
+            const normalized = target.includes("://") ? target : `http://${target}`;
             return {
                 "/parties": {
                     target: normalized,
@@ -38,10 +36,7 @@ export default defineConfig({
                 websocket: true,
             },
             rollupConfig: {
-                external: [
-                    "@excalidraw/excalidraw",
-                    "@excalidraw/laser-pointer",
-                ],
+                external: ["@excalidraw/excalidraw", "@excalidraw/laser-pointer"],
                 output: {
                     banner: "if(typeof globalThis.requestAnimationFrame==='undefined')globalThis.requestAnimationFrame=cb=>setTimeout(()=>cb(Date.now()),0);if(typeof globalThis.cancelAnimationFrame==='undefined')globalThis.cancelAnimationFrame=id=>clearTimeout(id);try{var requestAnimationFrame=globalThis.requestAnimationFrame;var cancelAnimationFrame=globalThis.cancelAnimationFrame;}catch(e){}",
                 },

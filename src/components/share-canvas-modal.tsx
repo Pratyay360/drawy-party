@@ -11,11 +11,7 @@ import { Token } from "@astryxdesign/core/Token";
 import { Check, Copy, Loader2, Share2, UserPlus, UserX } from "lucide-react";
 import { useCallback, useEffect } from "react";
 import { useUIStore } from "#/stores/ui";
-import {
-    listAvailableUsers,
-    shareCanvas,
-    unshareCanvas,
-} from "../services/canvases";
+import { listAvailableUsers, shareCanvas, unshareCanvas } from "../services/canvases";
 
 export function ShareCanvasModal() {
     const isOpen = useUIStore((s) => s.shareModal.isOpen);
@@ -60,13 +56,7 @@ export function ShareCanvasModal() {
             setShareTargetUser("");
             setShareCopied(false);
         }
-    }, [
-        isOpen,
-        loadUsers,
-        setShareErrorMsg,
-        setShareTargetUser,
-        setShareCopied,
-    ]);
+    }, [isOpen, loadUsers, setShareErrorMsg, setShareTargetUser, setShareCopied]);
 
     if (!canvasId) return null;
 
@@ -81,10 +71,7 @@ export function ShareCanvasModal() {
             setShareTargetUser("");
             onShareChange();
         } catch (error: unknown) {
-            const message =
-                error instanceof Error
-                    ? error.message
-                    : "Failed to share canvas.";
+            const message = error instanceof Error ? error.message : "Failed to share canvas.";
             setShareErrorMsg(message);
         } finally {
             setShareIsSharing(false);
@@ -145,12 +132,7 @@ export function ShareCanvasModal() {
                                         label={copied ? "Copied" : "Copy link"}
                                         variant="secondary"
                                         size="sm"
-                                        icon={
-                                            <Icon
-                                                icon={copied ? Check : Copy}
-                                                size="sm"
-                                            />
-                                        }
+                                        icon={<Icon icon={copied ? Check : Copy} size="sm" />}
                                         onClick={handleCopyLink}
                                     />
                                 </HStack>
@@ -161,26 +143,17 @@ export function ShareCanvasModal() {
                             {/* Add User Section */}
                             {isOwner && (
                                 <VStack gap={2}>
-                                    <Text weight="medium">
-                                        Share with people
-                                    </Text>
+                                    <Text weight="medium">Share with people</Text>
                                     <HStack gap={2} align="center">
                                         <TextInput
                                             label="Target username"
                                             isLabelHidden
                                             placeholder="Enter username..."
                                             value={targetUser}
-                                            onChange={(val) =>
-                                                setShareTargetUser(val)
-                                            }
+                                            onChange={(val) => setShareTargetUser(val)}
                                             onKeyDown={(e) => {
-                                                if (
-                                                    e.key === "Enter" &&
-                                                    targetUser.trim()
-                                                ) {
-                                                    void handleAddShare(
-                                                        targetUser,
-                                                    );
+                                                if (e.key === "Enter" && targetUser.trim()) {
+                                                    void handleAddShare(targetUser);
                                                 }
                                             }}
                                             size="sm"
@@ -189,53 +162,34 @@ export function ShareCanvasModal() {
                                         <Button
                                             label="Share"
                                             size="sm"
-                                            icon={
-                                                <Icon
-                                                    icon={UserPlus}
-                                                    size="sm"
-                                                />
-                                            }
+                                            icon={<Icon icon={UserPlus} size="sm" />}
                                             isLoading={isSharing}
                                             isDisabled={!targetUser.trim()}
-                                            onClick={() =>
-                                                handleAddShare(targetUser)
-                                            }
+                                            onClick={() => handleAddShare(targetUser)}
                                         />
                                     </HStack>
 
                                     {unsharedAvailableUsers.length > 0 && (
                                         <VStack gap={1}>
-                                            <Text type="supporting">
-                                                Registered users:
-                                            </Text>
+                                            <Text type="supporting">Registered users:</Text>
                                             <HStack gap={1} wrap="wrap">
-                                                {unsharedAvailableUsers.map(
-                                                    (user) => (
-                                                        <Button
-                                                            key={user}
-                                                            label={`+ ${user}`}
-                                                            variant="ghost"
-                                                            size="sm"
-                                                            onClick={() => {
-                                                                setShareTargetUser(
-                                                                    user,
-                                                                );
-                                                                void handleAddShare(
-                                                                    user,
-                                                                );
-                                                            }}
-                                                        />
-                                                    ),
-                                                )}
+                                                {unsharedAvailableUsers.map((user) => (
+                                                    <Button
+                                                        key={user}
+                                                        label={`+ ${user}`}
+                                                        variant="ghost"
+                                                        size="sm"
+                                                        onClick={() => {
+                                                            setShareTargetUser(user);
+                                                            void handleAddShare(user);
+                                                        }}
+                                                    />
+                                                ))}
                                             </HStack>
                                         </VStack>
                                     )}
 
-                                    {errorMsg && (
-                                        <Text type="supporting">
-                                            {errorMsg}
-                                        </Text>
-                                    )}
+                                    {errorMsg && <Text type="supporting">{errorMsg}</Text>}
                                 </VStack>
                             )}
 
@@ -249,50 +203,28 @@ export function ShareCanvasModal() {
                                     <HStack justify="between" align="center">
                                         <VStack gap={0}>
                                             <Text weight="medium">{owner}</Text>
-                                            <Text type="supporting">
-                                                Canvas Owner
-                                            </Text>
+                                            <Text type="supporting">Canvas Owner</Text>
                                         </VStack>
                                         <Token label="Owner" />
                                     </HStack>
 
                                     {/* Shared users */}
                                     {sharedWith.map((user) => (
-                                        <HStack
-                                            key={user}
-                                            justify="between"
-                                            align="center"
-                                        >
+                                        <HStack key={user} justify="between" align="center">
                                             <VStack gap={0}>
-                                                <Text weight="medium">
-                                                    {user}
-                                                </Text>
-                                                <Text type="supporting">
-                                                    Can view and edit
-                                                </Text>
+                                                <Text weight="medium">{user}</Text>
+                                                <Text type="supporting">Can view and edit</Text>
                                             </VStack>
                                             {isOwner &&
                                                 (unsharingUser === user ? (
-                                                    <Icon
-                                                        icon={Loader2}
-                                                        size="sm"
-                                                    />
+                                                    <Icon icon={Loader2} size="sm" />
                                                 ) : (
                                                     <IconButton
                                                         label={`Remove ${user}`}
                                                         variant="ghost"
                                                         size="sm"
-                                                        icon={
-                                                            <Icon
-                                                                icon={UserX}
-                                                                size="sm"
-                                                            />
-                                                        }
-                                                        onClick={() =>
-                                                            handleRemoveShare(
-                                                                user,
-                                                            )
-                                                        }
+                                                        icon={<Icon icon={UserX} size="sm" />}
+                                                        onClick={() => handleRemoveShare(user)}
                                                         tooltip="Remove access"
                                                     />
                                                 ))}
@@ -300,9 +232,7 @@ export function ShareCanvasModal() {
                                     ))}
 
                                     {sharedWith.length === 0 && (
-                                        <Text type="supporting">
-                                            Not shared with anyone yet.
-                                        </Text>
+                                        <Text type="supporting">Not shared with anyone yet.</Text>
                                     )}
                                 </VStack>
                             </VStack>

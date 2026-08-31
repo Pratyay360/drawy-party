@@ -13,9 +13,7 @@ function getInitialTheme(): Theme {
             return stored;
         }
 
-        const prefersDark = matchMedia
-            ? matchMedia("(prefers-color-scheme: dark)").matches
-            : false;
+        const prefersDark = matchMedia ? matchMedia("(prefers-color-scheme: dark)").matches : false;
         return prefersDark ? "dark" : "light";
     } catch {
         return SERVER_THEME;
@@ -63,11 +61,7 @@ function setThemeInternal(next: Theme) {
 }
 
 export function useTheme() {
-    const theme = useSyncExternalStore(
-        subscribe,
-        getCurrentTheme,
-        () => SERVER_THEME,
-    );
+    const theme = useSyncExternalStore(subscribe, getCurrentTheme, () => SERVER_THEME);
 
     useEffect(() => {
         applyTheme(theme);

@@ -12,8 +12,7 @@ export function getLibraryAssetUrl(path: string): string {
 export async function fetchLibraries(): Promise<ExcalidrawLibrary[]> {
     try {
         const response = await fetch(LIBRARIES_API_URL);
-        if (!response.ok)
-            throw new Error(`HTTP error! status: ${response.status}`);
+        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
         return await response.json();
     } catch (error) {
         console.error("Failed to fetch libraries:", error);
@@ -27,14 +26,10 @@ export async function fetchLibraryContent(
     const contentUrl = getLibraryAssetUrl(library.source);
     try {
         const response = await fetch(contentUrl);
-        if (!response.ok)
-            throw new Error(`HTTP error! status: ${response.status}`);
+        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
         return await response.json();
     } catch (error) {
-        console.error(
-            `Failed to fetch library content for ${library.name}:`,
-            error,
-        );
+        console.error(`Failed to fetch library content for ${library.name}:`, error);
         return null;
     }
 }

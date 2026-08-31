@@ -47,9 +47,7 @@ function toCanvasData(row: {
         owner: row.owner,
         isOwner: row.isOwner,
         sharedWith: row.sharedWith,
-        elements: Array.isArray(row.elements)
-            ? (row.elements as ExcalidrawElement[])
-            : [],
+        elements: Array.isArray(row.elements) ? (row.elements as ExcalidrawElement[]) : [],
         appState: row.appState as Partial<AppState>,
         files: row.files as BinaryFiles,
     };
@@ -96,30 +94,21 @@ export async function saveCanvas(
     publishCanvasEvent();
 }
 
-export async function updateCanvasTitle(
-    id: string,
-    title: string,
-): Promise<void> {
+export async function updateCanvasTitle(id: string, title: string): Promise<void> {
     await client.canvases.rename({ id, title });
     notifyCanvasUpdated();
     publishCanvasEvent();
     publishCanvasListChanged();
 }
 
-export async function shareCanvas(
-    id: string,
-    targetUsername: string,
-): Promise<void> {
+export async function shareCanvas(id: string, targetUsername: string): Promise<void> {
     await client.canvases.share({ id, targetUsername });
     notifyCanvasUpdated();
     publishCanvasEvent();
     publishCanvasListChanged();
 }
 
-export async function unshareCanvas(
-    id: string,
-    targetUsername: string,
-): Promise<void> {
+export async function unshareCanvas(id: string, targetUsername: string): Promise<void> {
     await client.canvases.unshare({ id, targetUsername });
     notifyCanvasUpdated();
     publishCanvasEvent();
@@ -145,9 +134,7 @@ export async function uploadCanvasAsset(
 }
 
 /** Keep only the app-state fields we persist, dropping transient editor state. */
-export function sanitizeExcalidrawAppState(
-    appState: Partial<AppState>,
-): Partial<AppState> {
+export function sanitizeExcalidrawAppState(appState: Partial<AppState>): Partial<AppState> {
     if (!appState) return {};
     return {
         viewBackgroundColor: appState.viewBackgroundColor,

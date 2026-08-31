@@ -559,16 +559,13 @@ export const butterTheme = defineTheme({
         // Gothic uses for its Manufacturing Consent display family.
         text: {
             "type:display-1": {
-                fontFamily:
-                    'Sarina, "Brush Script MT", "Snell Roundhand", cursive',
+                fontFamily: 'Sarina, "Brush Script MT", "Snell Roundhand", cursive',
             },
             "type:display-2": {
-                fontFamily:
-                    'Sarina, "Brush Script MT", "Snell Roundhand", cursive',
+                fontFamily: 'Sarina, "Brush Script MT", "Snell Roundhand", cursive',
             },
             "type:display-3": {
-                fontFamily:
-                    'Sarina, "Brush Script MT", "Snell Roundhand", cursive',
+                fontFamily: 'Sarina, "Brush Script MT", "Snell Roundhand", cursive',
             },
         },
     },

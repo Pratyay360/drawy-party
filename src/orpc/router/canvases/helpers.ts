@@ -23,12 +23,14 @@ export function toMeta(row: Canvas, currentUser?: string) {
 }
 
 export function toData(row: Canvas, currentUser?: string) {
-    const raw = (
-        row.appState && typeof row.appState === "object" ? row.appState : {}
-    ) as Record<string, unknown>;
-    const files = (
-        raw.files && typeof raw.files === "object" ? raw.files : {}
-    ) as Record<string, unknown>;
+    const raw = (row.appState && typeof row.appState === "object" ? row.appState : {}) as Record<
+        string,
+        unknown
+    >;
+    const files = (raw.files && typeof raw.files === "object" ? raw.files : {}) as Record<
+        string,
+        unknown
+    >;
     return {
         ...toMeta(row, currentUser),
         elements: row.elements,

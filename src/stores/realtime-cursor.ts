@@ -8,9 +8,7 @@ interface RealtimeCursorState {
     setCursors: (
         value:
             | Record<string, CursorEventPayload>
-            | ((
-                  prev: Record<string, CursorEventPayload>,
-              ) => Record<string, CursorEventPayload>),
+            | ((prev: Record<string, CursorEventPayload>) => Record<string, CursorEventPayload>),
     ) => void;
     reset: () => void;
 }

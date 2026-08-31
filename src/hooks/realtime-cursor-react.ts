@@ -30,13 +30,9 @@ export const useRealtimeCursors = ({
     throttleMs: number;
     awareness?: Awareness;
 }) => {
-    const [color] = useState(
-        () => `hsl(${Math.floor(Math.random() * 360)}, 100%, 70%)`,
-    );
+    const [color] = useState(() => `hsl(${Math.floor(Math.random() * 360)}, 100%, 70%)`);
     const [userId] = useState(
-        () =>
-            globalThis.crypto?.randomUUID?.() ??
-            `client-${Math.random().toString(36).slice(2)}`,
+        () => globalThis.crypto?.randomUUID?.() ?? `client-${Math.random().toString(36).slice(2)}`,
     );
     const setCursors = useRealtimeCursorStore((s) => s.setCursors);
     const cursors = useRealtimeCursorStore((s) => s.cursors);

@@ -1,9 +1,5 @@
 import { randomBytes, scryptSync, timingSafeEqual } from "node:crypto";
-import {
-    clearSession,
-    getSession,
-    updateSession,
-} from "@tanstack/react-start/server";
+import { clearSession, getSession, updateSession } from "@tanstack/react-start/server";
 import { eq } from "drizzle-orm";
 
 import { db } from "#/lib/db";
@@ -36,10 +32,7 @@ function getSessionConfig() {
     };
 }
 
-function hashPassword(
-    password: string,
-    salt = randomBytes(PASSWORD_SALT_LENGTH).toString("hex"),
-) {
+function hashPassword(password: string, salt = randomBytes(PASSWORD_SALT_LENGTH).toString("hex")) {
     const derivedKey = scryptSync(password, salt, PASSWORD_KEY_LENGTH);
     return `scrypt$${salt}$${derivedKey.toString("hex")}`;
 }
@@ -63,9 +56,7 @@ function verifyPassword(password: string, storedHash: string): boolean {
 
 function validateCredentials(username: string, _password: string): void {
     if (!/^[a-zA-Z0-9_-]+$/.test(username)) {
-        throw new Error(
-            "Username can only contain letters, numbers, underscores, and hyphens.",
-        );
+        throw new Error("Username can only contain letters, numbers, underscores, and hyphens.");
     }
 }
 
@@ -85,10 +76,7 @@ async function loadCurrentUser(): Promise<CurrentUser | null> {
         return { username: user.username };
     } catch (err) {
         // Neon free tier throws 53300 too_many_connections; don't crash beforeLoad
-        console.error(
-            "[session] loadCurrentUser failed:",
-            (err as Error).message,
-        );
+        console.error("[session] loadCurrentUser failed:", (err as Error).message);
         return null;
     }
 }
@@ -97,10 +85,7 @@ export async function resolveCurrentUserServer(): Promise<CurrentUser | null> {
     return loadCurrentUser();
 }
 
-export async function signInServer(
-    username: string,
-    _password: string,
-): Promise<CurrentUser> {
+export async function signInServer(username: string, _password: string): Promise<CurrentUser> {
     validateCredentials(username, _password);
 
     const [user] = await db
@@ -129,10 +114,7 @@ export async function signInServer(
     return { username: user.username };
 }
 
-export async function signUpServer(
-    username: string,
-    password: string,
-): Promise<CurrentUser> {
+export async function signUpServer(username: string, password: string): Promise<CurrentUser> {
     validateCredentials(username, password);
 
     const [existing] = await db

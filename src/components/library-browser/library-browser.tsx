@@ -88,13 +88,7 @@ export function LibraryBrowser({
         } else if (savedLoaded) {
             setPendingBrowseId(null);
         }
-    }, [
-        pendingBrowseId,
-        savedLibraries,
-        savedLoaded,
-        setBrowsingId,
-        setPendingBrowseId,
-    ]);
+    }, [pendingBrowseId, savedLibraries, savedLoaded, setBrowsingId, setPendingBrowseId]);
 
     useEffect(() => {
         void fetchLibraries().then((libs) => {
@@ -117,8 +111,7 @@ export function LibraryBrowser({
     }, [searchQuery, libraries, setFilteredLibraries]);
 
     const isSaved = useCallback(
-        (libraryId: string) =>
-            savedLibraries.some((lib) => lib.id === libraryId),
+        (libraryId: string) => savedLibraries.some((lib) => lib.id === libraryId),
         [savedLibraries],
     );
 
@@ -126,9 +119,7 @@ export function LibraryBrowser({
         if (isSaved(library.id)) {
             try {
                 await removeLibraryFromConfig(library.id);
-                setSavedLibraries((prev) =>
-                    prev.filter((lib) => lib.id !== library.id),
-                );
+                setSavedLibraries((prev) => prev.filter((lib) => lib.id !== library.id));
             } catch (error) {
                 console.error("Failed to remove library from config:", error);
             }
@@ -152,18 +143,11 @@ export function LibraryBrowser({
                 fetched_at: "",
             };
             await saveLibraryToConfig(saved);
-            setSavedLibraries((prev) => [
-                ...prev.filter((lib) => lib.id !== library.id),
-                saved,
-            ]);
+            setSavedLibraries((prev) => [...prev.filter((lib) => lib.id !== library.id), saved]);
             const content = await fetchLibraryContent(library);
             if (content) {
                 const items = await toLibraryItems(content, library.id);
-                await saveLibraryContent(
-                    library.id,
-                    library.itemNames || [],
-                    items,
-                );
+                await saveLibraryContent(library.id, library.itemNames || [], items);
                 await installLibraryItems(items);
                 await refreshSaved();
             }
@@ -192,11 +176,7 @@ export function LibraryBrowser({
             const content = await fetchLibraryContent(library);
             if (content) {
                 const items = await toLibraryItems(content, saved.id);
-                await saveLibraryContent(
-                    saved.id,
-                    library.itemNames || [],
-                    items,
-                );
+                await saveLibraryContent(saved.id, library.itemNames || [], items);
                 await installLibraryItems(items);
             }
             await refreshSaved();
@@ -211,9 +191,7 @@ export function LibraryBrowser({
         setRemovingId(saved.id);
         try {
             await removeLibraryFromConfig(saved.id);
-            setSavedLibraries((prev) =>
-                prev.filter((lib) => lib.id !== saved.id),
-            );
+            setSavedLibraries((prev) => prev.filter((lib) => lib.id !== saved.id));
         } catch (error) {
             console.error("Failed to remove library from config:", error);
         } finally {
@@ -221,8 +199,7 @@ export function LibraryBrowser({
         }
     }
 
-    const browsingLibrary =
-        savedLibraries.find((lib) => lib.id === browsingId) ?? null;
+    const browsingLibrary = savedLibraries.find((lib) => lib.id === browsingId) ?? null;
 
     if (loading || (pendingBrowseId != null && !savedLoaded)) {
         return (
@@ -245,9 +222,7 @@ export function LibraryBrowser({
                     library={browsingLibrary}
                     source={source}
                     onBack={() => setBrowsingId(null)}
-                    onRefreshContent={() =>
-                        handleRefreshLibrary(browsingLibrary)
-                    }
+                    onRefreshContent={() => handleRefreshLibrary(browsingLibrary)}
                 />
             </Suspense>
         );
@@ -258,8 +233,8 @@ export function LibraryBrowser({
             <VStack gap={1}>
                 <Heading level={2}>Excalidraw Libraries</Heading>
                 <Text type="supporting">
-                    Save a library to download its components into your library
-                    panel — they stay available offline
+                    Save a library to download its components into your library panel — they stay
+                    available offline
                 </Text>
             </VStack>
 

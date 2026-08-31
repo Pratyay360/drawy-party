@@ -3,21 +3,22 @@ import { useCallback } from "react";
 import { useCanvasStore } from "#/stores/canvas";
 import { saveCanvas, uploadCanvasAsset } from "../../services/canvases";
 import { pruneUnusedFiles, uploadPendingAssets } from "../../utils/assets";
-import {
-    areAppStatesEqual,
-    areElementsEqual,
-    getPersistentAppState,
-} from "./utils";
+import { areAppStatesEqual, areElementsEqual, getPersistentAppState } from "./utils";
+
+function withTimeout<T>(promise: Promise<T>, ms: number, label: string): Promise<T> {
+    let timer: ReturnType<typeof setTimeout>;
+    const timeout = new Promise<never>((_, reject) => {
+        timer = setTimeout(() => reject(new Error(`${label} timed out after ${ms}ms`)), ms);
+    });
+    return Promise.race([promise, timeout]).finally(() => clearTimeout(timer)) as Promise<T>;
+}
 
 interface UseCanvasHandlersOptions {
     id: string;
     filesRef: React.RefObject<BinaryFiles>;
-    excalidrawAPI:
-        import("@excalidraw/excalidraw/types").ExcalidrawImperativeAPI | null;
+    excalidrawAPI: import("@excalidraw/excalidraw/types").ExcalidrawImperativeAPI | null;
     isSavingRef: React.RefObject<boolean>;
-    realtimeRef: React.RefObject<
-        import("../../utils/canvas-realtime").CanvasRealtime | null
-    >;
+    realtimeRef: React.RefObject<import("../../utils/canvas-realtime").CanvasRealtime | null>;
     applyingRemoteRef: React.RefObject<boolean>;
     lastLocalEditRef: React.RefObject<number>;
     lastSavedData: React.RefObject<{
@@ -51,12 +52,13 @@ export function useCanvasHandlers({
         setSaveStatus("saving");
         isSavingRef.current = true;
         try {
-            const prunedFiles = pruneUnusedFiles(
-                filesRef.current,
-                currentElements,
-            );
+            const prunedFiles = pruneUnusedFiles(filesRef.current, currentElements);
             filesRef.current = prunedFiles;
-            await saveCanvas(id, currentElements, currentAppState, prunedFiles);
+            await withTimeout(
+                saveCanvas(id, currentElements, currentAppState, prunedFiles),
+                12000,
+                "Saving canvas",
+            );
             setSaveStatus("saved");
             realtimeRef.current?.broadcastSaved();
         } catch (error) {
@@ -99,23 +101,21 @@ export function useCanvasHandlers({
                 filesChanged = true;
 
                 if (id) {
-                    void uploadPendingAssets(
-                        id,
-                        currentFiles,
-                        uploadCanvasAsset,
-                    ).then(({ updatedFiles, hasNewUploads }) => {
-                        if (hasNewUploads) {
-                            // Merge with current state to avoid overwriting files
-                            // that were added between the snapshot and upload completion.
-                            filesRef.current = {
-                                ...filesRef.current,
-                                ...updatedFiles,
-                            };
-                            if (api) {
-                                api.addFiles(Object.values(updatedFiles));
+                    void uploadPendingAssets(id, currentFiles, uploadCanvasAsset).then(
+                        ({ updatedFiles, hasNewUploads }) => {
+                            if (hasNewUploads) {
+                                // Merge with current state to avoid overwriting files
+                                // that were added between the snapshot and upload completion.
+                                filesRef.current = {
+                                    ...filesRef.current,
+                                    ...updatedFiles,
+                                };
+                                if (api) {
+                                    api.addFiles(Object.values(updatedFiles));
+                                }
                             }
-                        }
-                    });
+                        },
+                    );
                 }
             }
 
@@ -123,16 +123,12 @@ export function useCanvasHandlers({
                 id: e.id,
                 version: e.version,
             }));
-            const currentPersistentState =
-                getPersistentAppState(excalidrawAppState);
+            const currentPersistentState = getPersistentAppState(excalidrawAppState);
 
             const savedElementsSig = lastSavedData.current?.elements || [];
             const savedPersistentState = lastSavedData.current?.appState || {};
 
-            const elementsChanged = !areElementsEqual(
-                currentElementsSig,
-                savedElementsSig,
-            );
+            const elementsChanged = !areElementsEqual(currentElementsSig, savedElementsSig);
             const appStateChanged = !areAppStatesEqual(
                 currentPersistentState,
                 savedPersistentState,
@@ -210,17 +206,13 @@ export function useCanvasHandlers({
                     const imported = JSON.parse(event.target?.result as string);
                     if (imported && Array.isArray(imported.elements)) {
                         if (excalidrawAPI) {
-                            const importedAppState = getPersistentAppState(
-                                imported.appState || {},
-                            );
+                            const importedAppState = getPersistentAppState(imported.appState || {});
                             if (imported.files) {
                                 filesRef.current = {
                                     ...filesRef.current,
                                     ...imported.files,
                                 };
-                                excalidrawAPI.addFiles(
-                                    Object.values(imported.files),
-                                );
+                                excalidrawAPI.addFiles(Object.values(imported.files));
                             }
                             excalidrawAPI.updateScene({
                                 elements: imported.elements,

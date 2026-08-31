@@ -1,4 +1,5 @@
 # Introducing Drawy-party (partykit + postgres version of the drawy app)
+
 A real time collaboration capable drawing app(powered by Excalidraw) which is easy to deploy and self host built with the tech stack you already know.
 A easily selfhostable collaborative whiteboard powered by Excalidraw, PartyKit, and Postgres.
 Got tired of the single board limitation in excalidraw and wanted something I could actually deploy myself. Though the official Excalidraw Docker image is easy to run,
@@ -11,7 +12,6 @@ A real time collaboration capable drawing app(powered by Excalidraw) which is ea
 built with the tech stack you already know.
 
 [![drawy party demo](https://img.youtube.com/vi/CLnAY4AO0yY/hqdefault.jpg)](http://www.youtube.com/watch?v=CLnAY4AO0yY "drawy + partykit")
-
 
 [![Netlify Status](https://api.netlify.com/api/v1/badges/87baadb1-b688-415f-8faf-ee6084958e37/deploy-status)](https://app.netlify.com/projects/drawy-party/deploys)
 

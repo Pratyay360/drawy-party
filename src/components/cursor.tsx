@@ -12,10 +12,7 @@ export const Cursor = ({
     name: string;
 }) => {
     return (
-        <div
-            className={`pointer-events-none${className ? ` ${className}` : ""}`}
-            style={style}
-        >
+        <div className={`pointer-events-none${className ? ` ${className}` : ""}`} style={style}>
             <MousePointer2 color={color} fill={color} size={30} />
 
             <div
