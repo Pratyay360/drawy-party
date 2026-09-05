@@ -5,7 +5,11 @@ import { AppThemeProvider } from "../components/app-theme-provider";
 import { GlobalDialogs } from "../components/global-dialogs";
 import "../styles.css";
 
-const themeScript = `(function(){try{var s=localStorage.getItem("drawy-theme");var t=s==="light"||s==="dark"?s:(matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light");var r=document.documentElement;r.classList.toggle("dark",t==="dark");r.dataset.theme=t;r.style.colorScheme=t;}catch(e){}})();`;
+/**
+ * Restores the persisted theme + mode before first paint (no flash).
+ * Mirrors readStored* / getEffectiveMode in hooks/usetheme.ts.
+ */
+const themeScript = `(function(){try{var n=localStorage.getItem("drawy-theme");var names=["butter","neutral","matcha","stone","y2k","gothic"];if(!n||names.indexOf(n)<0){n="butter";}var darkOnly={gothic:1};var p=localStorage.getItem("drawy-theme-mode")||"system";var m;if(darkOnly[n]){m="dark";}else if(p==="light"||p==="dark"){m=p;}else{m=matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light";}var r=document.documentElement;r.classList.toggle("dark",m==="dark");r.dataset.theme=m;r.dataset.appTheme=n;r.style.colorScheme=m;}catch(e){}})();`;
 
 interface MyRouterContext {
     queryClient: QueryClient;

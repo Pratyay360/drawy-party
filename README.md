@@ -13,9 +13,7 @@ built with the tech stack you already know.
 
 [![drawy party demo](https://img.youtube.com/vi/CLnAY4AO0yY/hqdefault.jpg)](http://www.youtube.com/watch?v=CLnAY4AO0yY "drawy + partykit")
 
-[![Netlify Status](https://api.netlify.com/api/v1/badges/87baadb1-b688-415f-8faf-ee6084958e37/deploy-status)](https://app.netlify.com/projects/drawy-party/deploys)
-
-[![Deploy to Netlify](https://www.netlify.com/img/deploy/button.svg)](https://app.netlify.com/integration/start/deploy?repository=https://github.com/pratyay360/drawy-party)
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2FPratyay360%2Fdrawy-party&env=VITE_PARTYKIT_URL,PARTYKIT_SECRET,DATABASE_URL,SESSION_SECRET&project-name=drawy-party&repository-name=drawy-party)
 
 [use now](https://drawyparty.pratyay.qzz.io)
 

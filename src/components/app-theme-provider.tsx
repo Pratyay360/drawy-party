@@ -1,11 +1,12 @@
 import { Theme } from "@astryxdesign/core";
 import { useTheme } from "../hooks/usetheme";
-import { butterTheme } from "../themes/butter/butterTheme";
+import { themeRegistry } from "../themes/index";
 
 export function AppThemeProvider({ children }: { children: React.ReactNode }) {
-    const { theme } = useTheme();
+    const { themeName, modePreference } = useTheme();
+    const entry = themeRegistry[themeName];
     return (
-        <Theme theme={butterTheme} mode={theme}>
+        <Theme theme={entry.theme} mode={entry.darkOnly ? "dark" : modePreference}>
             {children}
         </Theme>
     );

@@ -5,8 +5,12 @@
     "": {
       "name": "drawy",
       "dependencies": {
-        "@astryxdesign/cli": "^0.5.1",
-        "@astryxdesign/core": "^0.5.1",
+        "@astryxdesign/cli": "^0.5.2",
+        "@astryxdesign/core": "^0.5.2",
+        "@astryxdesign/theme-matcha": "^0.5.2",
+        "@astryxdesign/theme-neutral": "^0.5.2",
+        "@astryxdesign/theme-stone": "^0.5.2",
+        "@astryxdesign/theme-y2k": "^0.5.2",
         "@excalidraw/excalidraw": "^0.18.1",
         "@neodrag/react": "^2.3.1",
         "@orpc/client": "^1.15.0",
@@ -72,11 +76,17 @@
   "packages": {
     "@antfu/install-pkg": ["@antfu/install-pkg@1.1.0", "", { "dependencies": { "package-manager-detector": "^1.3.0", "tinyexec": "^1.0.1" } }, "sha512-MGQsmw10ZyI+EJo45CdSER4zEb+p31LpDAFp2Z3gkSd1yqVZGi0Ebx++YTEMonJy4oChEMLsxZ64j8FH6sSqtQ=="],
 
-    "@astryxdesign/cli": ["@astryxdesign/cli@0.5.1", "", { "dependencies": { "commander": "^12.1.0", "jiti": "^2.7.0", "jscodeshift": "^17.3.0", "zod": "^4.4.3" }, "peerDependencies": { "@astryxdesign/charts": "*", "@astryxdesign/core": "*", "@astryxdesign/lab": "*", "@astryxdesign/theme-neutral": "*", "gpt-tokenizer": "^3.4.0" }, "optionalPeers": ["@astryxdesign/charts", "@astryxdesign/core", "@astryxdesign/lab", "@astryxdesign/theme-neutral"], "bin": { "cli": "./clients/cli/bin/astryx.mjs", "astryx": "./clients/cli/bin/astryx.mjs" } }, "sha512-sui7UTl47I4Z3Rgo7tmDeKIrX9rIE5WjACGvNTr87C03FAVK97GXSwvXE5gZCQhi2gLfrlRy14rWP3FyvVnl9w=="],
+    "@astryxdesign/cli": ["@astryxdesign/cli@0.5.2", "", { "dependencies": { "commander": "^12.1.0", "jiti": "^2.7.0", "jscodeshift": "^17.3.0", "zod": "^4.4.3" }, "peerDependencies": { "@astryxdesign/charts": "*", "@astryxdesign/core": "*", "@astryxdesign/lab": "*", "@astryxdesign/theme-neutral": "*", "gpt-tokenizer": "^3.4.0" }, "optionalPeers": ["@astryxdesign/charts", "@astryxdesign/core", "@astryxdesign/lab", "@astryxdesign/theme-neutral"], "bin": { "cli": "./clients/cli/bin/astryx.mjs", "astryx": "./clients/cli/bin/astryx.mjs" } }, "sha512-JKEV7JJZjapMB8fPe+HR/ZRRYD3Qce0c0tt/YjNsHDCUSAYxg0ZSWJgb1zKpqVaJzRws/IN9rKws2GsIDYkrMA=="],
 
-    "@astryxdesign/core": ["@astryxdesign/core@0.5.1", "", { "dependencies": { "intl-messageformat": "^11.2.9" }, "peerDependencies": { "@stylexjs/stylex": "^0.19.0", "react": ">=19.0.0", "react-dom": ">=19.0.0" } }, "sha512-2g1Ie3PS8wA7h7jMo2OT68q5biNoBNZm2y5VNNP1XPa9PsI2WDcSyDpFBTWTKgdlfZwEYWNDcpEpCP7U9TjSvg=="],
+    "@astryxdesign/core": ["@astryxdesign/core@0.5.2", "", { "dependencies": { "intl-messageformat": "^11.2.9" }, "peerDependencies": { "@stylexjs/stylex": "^0.19.0", "react": ">=19.0.0", "react-dom": ">=19.0.0" } }, "sha512-wJXjKIDpvqHG6t6BFzqRSuaJWIC2vMH3+9b4kVjwQE8LTYI5uUY6m8e5RQq06OC4BVTOHmnrhWfAzhsTaXFelw=="],
 
-    "@astryxdesign/theme-neutral": ["@astryxdesign/theme-neutral@0.5.1", "", { "dependencies": { "lucide-react": "^1.18.0" }, "peerDependencies": { "@astryxdesign/core": "0.5.1", "react": ">=19" } }, "sha512-EelWpi9jXJv1koicqPdp2N+xv4cST2A4DgOJEva8/cZsKycHC5GTZQHbxpvbvO88DcS9TeXxUZSu0AAomJhUnQ=="],
+    "@astryxdesign/theme-matcha": ["@astryxdesign/theme-matcha@0.5.2", "", { "dependencies": { "lucide-react": "^1.18.0" }, "peerDependencies": { "@astryxdesign/core": "0.5.2", "react": ">=19" } }, "sha512-pWZoAeUt4gmSTjd8v4+pMQQaxWXjavudIQ9LyP7BqFJRklObAloeil4sG6ZAvlV9hCfy8TcjUSPgefCcYsrc1g=="],
+
+    "@astryxdesign/theme-neutral": ["@astryxdesign/theme-neutral@0.5.2", "", { "dependencies": { "lucide-react": "^1.18.0" }, "peerDependencies": { "@astryxdesign/core": "0.5.2", "react": ">=19" } }, "sha512-eVCN+x6OdnQk5Zw3ksAgrIKhDiTzu+0oFi689jyf0TPzFrz50f5VT3OB4SHeGgShp4dzFDWPgz6GUFQda6kTHw=="],
+
+    "@astryxdesign/theme-stone": ["@astryxdesign/theme-stone@0.5.2", "", { "dependencies": { "lucide-react": "^1.18.0" }, "peerDependencies": { "@astryxdesign/core": "0.5.2", "react": ">=19" } }, "sha512-qijUFvSmRNpXK0RVWpspCuRqYz/1vJyI8WPP6miHoVoShKXzi7B+hGr92DuUCFDcWxwzxAsY03IzLFEyIcpHyQ=="],
+
+    "@astryxdesign/theme-y2k": ["@astryxdesign/theme-y2k@0.5.2", "", { "dependencies": { "lucide-react": "^1.18.0" }, "peerDependencies": { "@astryxdesign/core": "0.5.2", "react": ">=19" } }, "sha512-FF4Vsgq6DpqdDulKk/Zr5+5a+zAs3WM8e8+PnLWqRBtaG+0C4AtdUogEqSJSf0w77fGlVMJDWvA56/kC69Q7LQ=="],
 
     "@babel/code-frame": ["@babel/code-frame@7.29.7", "", { "dependencies": { "@babel/helper-validator-identifier": "^7.29.7", "js-tokens": "^4.0.0", "picocolors": "^1.1.1" } }, "sha512-Aup7aUOfpbAUg2ROOJN6Iw5f9DMBlzu0mIkm/malLQFN/YQgO48wCj0Kxa3sEHJvPVFg7siR+qRInwXd2qhQKw=="],
 

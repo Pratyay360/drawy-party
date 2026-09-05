@@ -45,7 +45,7 @@ interface CanvasEditorProps {
 
 export function CanvasEditor({ id, username: propUsername }: CanvasEditorProps) {
     const navigate = useNavigate();
-    const { theme } = useTheme();
+    const { mode } = useTheme();
 
     // --- Lifecycle hook (loading, saving, realtime) ---
     const lifecycle = useCanvasLifecycle({ id });
@@ -323,7 +323,7 @@ export function CanvasEditor({ id, username: propUsername }: CanvasEditorProps) 
                                 {lifecycle.excalidrawModule ? (
                                     <lifecycle.excalidrawModule.Excalidraw
                                         excalidrawAPI={lifecycle.setExcalidrawAPI}
-                                        theme={theme}
+                                        theme={mode}
                                         isCollaborating
                                         onPointerUpdate={() => {}}
                                         initialData={{
