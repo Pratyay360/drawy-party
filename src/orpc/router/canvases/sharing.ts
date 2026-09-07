@@ -96,6 +96,35 @@ export const unshare = base
             .where(eq(canvases.id, input.id));
     });
 
+export const setPublic = base
+    .input(z.object({ id: z.string(), isPublic: z.boolean() }))
+    .output(z.object({ isPublic: z.boolean() }))
+    .handler(async ({ input, context }) => {
+        const username = context.user?.username;
+        if (!username)
+            throw new ORPCError("UNAUTHORIZED", {
+                message: "Not authenticated",
+            });
+
+        const [canvas] = await db
+            .select({ userId: canvases.userId })
+            .from(canvases)
+            .where(eq(canvases.id, input.id))
+            .limit(1);
+        if (!canvas) throw new ORPCError("NOT_FOUND", { message: "Canvas not found" });
+        if (canvas.userId !== username)
+            throw new ORPCError("FORBIDDEN", {
+                message: "Only the owner can manage link sharing.",
+            });
+
+        await db
+            .update(canvases)
+            .set({ isPublic: input.isPublic, updatedAt: new Date() })
+            .where(eq(canvases.id, input.id));
+
+        return { isPublic: input.isPublic };
+    });
+
 export const listUsers = base.output(z.array(z.string())).handler(async ({ context }) => {
     const rows = await db
         .select({ username: appUsers.username })

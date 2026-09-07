@@ -10,7 +10,7 @@ import { HStack, VStack } from "@astryxdesign/core/Stack";
 import { Text } from "@astryxdesign/core/Text";
 import { Token } from "@astryxdesign/core/Token";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { Loader2, PenTool, Plus, Trash2 } from "lucide-react";
+import { Globe, Loader2, PenTool, Plus, Trash2 } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Sidebar } from "../../components/sidebar";
 import { type Canvas, createCanvas, deleteCanvas, listCanvases } from "../../services/canvases";
@@ -199,6 +199,16 @@ function Home() {
                                                     {!canvas.isOwner && (
                                                         <Token
                                                             label={`Shared by ${canvas.owner}`}
+                                                        />
+                                                    )}
+                                                    {canvas.isPublic && (
+                                                        <Token
+                                                            label="Public"
+                                                            size="sm"
+                                                            icon={
+                                                                <Icon icon={Globe} size="sm" />
+                                                            }
+                                                            description="Anyone with the link can view"
                                                         />
                                                     )}
                                                 </HStack>

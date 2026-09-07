@@ -12,6 +12,19 @@ export interface Canvas {
     owner: string;
     isOwner: boolean;
     sharedWith: string[];
+    isPublic: boolean;
+}
+
+export interface CanvasVersion {
+    id: string;
+    title: string;
+    createdAt: string;
+    createdBy: string | null;
+}
+
+export interface CanvasVersionDetail extends CanvasVersion {
+    elements: ExcalidrawElement[];
+    appState: Partial<AppState>;
 }
 
 export interface CanvasData extends Canvas {
@@ -35,6 +48,7 @@ function toCanvasData(row: {
     owner: string;
     isOwner: boolean;
     sharedWith: string[];
+    isPublic: boolean;
     elements?: unknown;
     appState?: unknown;
     files?: unknown;
@@ -47,6 +61,7 @@ function toCanvasData(row: {
         owner: row.owner,
         isOwner: row.isOwner,
         sharedWith: row.sharedWith,
+        isPublic: row.isPublic,
         elements: Array.isArray(row.elements) ? (row.elements as ExcalidrawElement[]) : [],
         appState: row.appState as Partial<AppState>,
         files: row.files as BinaryFiles,
@@ -76,6 +91,45 @@ export async function loadCanvas(id: string): Promise<CanvasData | null> {
     const canvas = await client.canvases.get({ id });
     if (!canvas) return null;
     return toCanvasData(canvas);
+}
+
+/** Anonymous read-only load. Returns null unless the owner enabled link sharing. */
+export async function loadPublicCanvas(id: string): Promise<CanvasData | null> {
+    const canvas = await client.canvases.getPublic({ id });
+    if (!canvas) return null;
+    return toCanvasData(canvas);
+}
+
+export async function setCanvasPublic(id: string, isPublic: boolean): Promise<void> {
+    await client.canvases.setPublic({ id, isPublic });
+    notifyCanvasUpdated();
+    publishCanvasEvent();
+    publishCanvasListChanged();
+}
+
+export async function listCanvasVersions(canvasId: string): Promise<CanvasVersion[]> {
+    return client.canvases.versions.list({ canvasId });
+}
+
+export async function getCanvasVersion(
+    canvasId: string,
+    versionId: string,
+): Promise<CanvasVersionDetail> {
+    const version = await client.canvases.versions.get({
+        canvasId,
+        versionId,
+    });
+    return {
+        ...version,
+        elements: Array.isArray(version.elements) ? (version.elements as ExcalidrawElement[]) : [],
+        appState: (version.appState ?? {}) as Partial<AppState>,
+    };
+}
+
+export async function restoreCanvasVersion(canvasId: string, versionId: string): Promise<void> {
+    await client.canvases.versions.restore({ canvasId, versionId });
+    notifyCanvasUpdated();
+    publishCanvasEvent();
 }
 
 export async function saveCanvas(

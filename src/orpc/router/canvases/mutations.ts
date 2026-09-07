@@ -4,7 +4,12 @@ import { z } from "zod";
 import { db } from "#/lib/db";
 import { canvases } from "#/lib/db/schema";
 import { base } from "../../context";
-import { fail, parseCanvasAppState, toMeta } from "./helpers";
+import {
+    fail,
+    maybeRecordPeriodicVersion,
+    parseCanvasAppState,
+    toMeta,
+} from "./helpers";
 
 export const create = base
     .input(z.object({ title: z.string() }))
@@ -17,6 +22,7 @@ export const create = base
             owner: z.string(),
             isOwner: z.boolean(),
             sharedWith: z.array(z.string()),
+            isPublic: z.boolean(),
         }),
     )
     .handler(async ({ input, context }) => {
@@ -59,7 +65,7 @@ export const save = base
             });
 
         const [existing] = await db
-            .select({ userId: canvases.userId, appState: canvases.appState })
+            .select({ userId: canvases.userId, appState: canvases.appState, title: canvases.title })
             .from(canvases)
             .where(eq(canvases.id, input.id))
             .limit(1);
@@ -79,19 +85,28 @@ export const save = base
             string,
             unknown
         >;
+        const mergedAppState = {
+            ...parseCanvasAppState(input.appState),
+            sharedWith: shared,
+            files: input.files ?? exFiles,
+        };
 
         await db
             .update(canvases)
             .set({
                 elements: input.elements,
-                appState: {
-                    ...parseCanvasAppState(input.appState),
-                    sharedWith: shared,
-                    files: input.files ?? exFiles,
-                },
+                appState: mergedAppState,
                 updatedAt: new Date(),
             })
             .where(eq(canvases.id, input.id));
+
+        // Periodic version history: snapshot at most once per interval.
+        await maybeRecordPeriodicVersion(input.id, {
+            title: existing.title ?? "Untitled",
+            elements: input.elements,
+            appState: mergedAppState,
+            createdBy: username,
+        });
     });
 
 export const rename = base

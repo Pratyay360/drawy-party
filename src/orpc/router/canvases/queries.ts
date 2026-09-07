@@ -17,6 +17,7 @@ export const list = base
                 owner: z.string(),
                 isOwner: z.boolean(),
                 sharedWith: z.array(z.string()),
+                isPublic: z.boolean(),
             }),
         ),
     )
@@ -37,24 +38,23 @@ export const list = base
             .map((row) => toMeta(row, username));
     });
 
+const canvasDataSchema = z.object({
+    id: z.string(),
+    title: z.string(),
+    createdAt: z.string(),
+    updatedAt: z.string(),
+    owner: z.string(),
+    isOwner: z.boolean(),
+    sharedWith: z.array(z.string()),
+    isPublic: z.boolean(),
+    elements: z.any(),
+    appState: z.any(),
+    files: z.any().optional(),
+});
+
 export const get = base
     .input(z.object({ id: z.string() }))
-    .output(
-        z
-            .object({
-                id: z.string(),
-                title: z.string(),
-                createdAt: z.string(),
-                updatedAt: z.string(),
-                owner: z.string(),
-                isOwner: z.boolean(),
-                sharedWith: z.array(z.string()),
-                elements: z.any(),
-                appState: z.any(),
-                files: z.any().optional(),
-            })
-            .nullable(),
-    )
+    .output(canvasDataSchema.nullable())
     .handler(async ({ input, context }) => {
         const username = context.user?.username;
         if (!username)
@@ -72,4 +72,19 @@ export const get = base
             });
         }
         return toData(row, username);
+    });
+
+/**
+ * Anonymous read-only access. Returns the canvas only when the owner has
+ * enabled link sharing (`is_public`); otherwise null so private canvas IDs
+ * are not distinguishable from missing ones.
+ */
+export const getPublic = base
+    .input(z.object({ id: z.string() }))
+    .output(canvasDataSchema.nullable())
+    .handler(async ({ input, context }) => {
+        const [row] = await db.select().from(canvases).where(eq(canvases.id, input.id)).limit(1);
+        if (!row) return null;
+        if (row.isPublic !== true) return null;
+        return toData(row, context.user?.username);
     });

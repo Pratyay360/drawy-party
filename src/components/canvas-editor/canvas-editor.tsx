@@ -13,6 +13,7 @@ import {
     ArrowLeft,
     Download,
     FileCode,
+    History,
     Image,
     Layers,
     Loader2,
@@ -63,6 +64,7 @@ export function CanvasEditor({ id, username: propUsername }: CanvasEditorProps) 
     });
 
     const openShareCanvas = useUIStore((s) => s.openShareCanvas);
+    const openVersionHistory = useUIStore((s) => s.openVersionHistory);
 
     // --- Username initialization ---
     const setUsername = useCanvasStore((s) => s.setUsername);
@@ -292,6 +294,14 @@ export function CanvasEditor({ id, username: propUsername }: CanvasEditorProps) 
                                     onClick={handlers.handleManualSave}
                                 />
                                 <Button
+                                    label="History"
+                                    variant="ghost"
+                                    size="sm"
+                                    icon={<Icon icon={History} size="sm" />}
+                                    onClick={() => openVersionHistory(id)}
+                                    tooltip="Version history"
+                                />
+                                <Button
                                     label="Share"
                                     variant="secondary"
                                     size="sm"
@@ -303,6 +313,7 @@ export function CanvasEditor({ id, username: propUsername }: CanvasEditorProps) 
                                             owner: lifecycle.canvasData.owner,
                                             isOwner: lifecycle.canvasData.isOwner,
                                             sharedWith: lifecycle.canvasData.sharedWith,
+                                            isPublic: lifecycle.canvasData.isPublic,
                                         })
                                     }
                                 />

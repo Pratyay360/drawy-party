@@ -16,16 +16,12 @@ const handler = new RPCHandler(router, {
 
 async function handle({ request }: { request: Request }) {
     const user = await getCurrentUser();
-    if (!user) {
-        return new Response(JSON.stringify({ error: "Unauthorized" }), {
-            status: 401,
-            headers: { "content-type": "application/json" },
-        });
-    }
 
+    // Anonymous requests are allowed through — individual procedures enforce
+    // authentication (e.g. `getPublic` is a public read-only endpoint).
     const { response } = await handler.handle(request, {
         prefix: "/api/rpc",
-        context: { request, user },
+        context: { request, user: user ?? undefined },
     });
 
     return response ?? new Response("Not Found", { status: 404 });
