@@ -9,7 +9,6 @@ const STALE_ROOM_MS = 5 * 60 * 1000;
 type RoomReport = { room: string; count: number; at: number };
 
 export default class OccupancyServer implements Party.Server {
-    /** room id -> last occupancy report. */
     private rooms = new Map<string, RoomReport>();
 
     constructor(public room: Party.Room) {}

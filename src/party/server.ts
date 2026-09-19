@@ -6,10 +6,6 @@ import * as syncProtocol from "y-protocols/sync";
 import * as Y from "yjs";
 import { SINGLETON_ROOM_ID } from "./rooms";
 
-// Ephemeral Yjs server — no persistence.
-// The scene itself is persisted in the app database; the doc lives only in
-// memory for the lifetime of the room.
-
 const messageSync = 0;
 const messageAwareness = 1;
 const messageQueryAwareness = 3;
@@ -17,10 +13,6 @@ const BATCH_SENTINEL = "y-pk-batch";
 
 type IncomingMessage = string | ArrayBuffer | ArrayBufferView;
 
-/** Binary frames can arrive as a Blob when the server-side WebSocket
- * `binaryType` is "blob" (the default in PartyKit's local dev runtime and
- * some Cloudflare runtimes). We normalize everything to Uint8Array; a Blob
- * is read asynchronously before being handed to the (sync) receive path. */
 function isBlobLike(value: unknown): value is Blob {
     return typeof Blob !== "undefined" && value instanceof Blob;
 }
@@ -110,17 +102,13 @@ function createMessageReceiver(
     };
 }
 
-/** Empty or malformed binary frames decode as lib0's
- * "Unexpected end of array". They are safe to drop — the next sync round
- * will reconcile state. */
+
 function isTruncatedUpdate(error: unknown): boolean {
     return error instanceof Error && error.message.includes("Unexpected end of array");
 }
 
 interface Client {
-    /** Awareness clientIDs owned by this connection, removed on disconnect. */
     controlledStates: Set<number>;
-    /** Chunk-aware Yjs frame receiver. Returns true when consumed. */
     receive: (message: IncomingMessage) => Promise<boolean>;
 }
 
@@ -161,7 +149,9 @@ export default class EditorServer implements Party.Server {
             receive: createMessageReceiver((bytes) => {
                 try {
                     this.handleYjsMessage(conn, bytes);
-                } catch (err) {}
+                } catch (err) {
+                    // pass
+                }
             }),
         });
 

@@ -11,8 +11,7 @@ function getPartykitHost(): string | undefined {
     return PARTYKIT_HOST ?? (typeof window !== "undefined" ? window.location.host : undefined);
 }
 
-/** One color per session so the awareness badge and the cursor rendered from
- * it never disagree. */
+
 function pickPresenceColor(): string {
     return `hsl(${Math.floor(Math.random() * 360)}, 100%, 70%)`;
 }

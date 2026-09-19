@@ -11,7 +11,6 @@ export default defineConfig({
         proxy: (() => {
             const target = process.env.VITE_PARTYKIT_URL!;
             if (!target) return undefined;
-            // Vite proxy expects a full URL; if only a host is provided, prefix with http://
             const normalized = target.includes("://") ? target : `http://${target}`;
             return {
                 "/parties": {

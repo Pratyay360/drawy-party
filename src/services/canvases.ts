@@ -36,7 +36,6 @@ export interface CanvasData extends Canvas {
 const CANVAS_UPDATED_EVENT = "canvas-updated";
 
 function notifyCanvasUpdated() {
-    // if (typeof window === "undefined") return;
     dispatchEvent(new Event(CANVAS_UPDATED_EVENT));
 }
 

@@ -41,13 +41,9 @@ export function canWriteCanvas(row: Pick<Canvas, "userId" | "appState">, usernam
     if (row.userId === username) return true;
     return parseCanvasAppState(row.appState).sharedWith.includes(username);
 }
-
-/** Record a version-history snapshot at most this often per canvas. */
 export const VERSION_SNAPSHOT_INTERVAL_MS = 5 * 60 * 1000;
-/** Keep only the newest N snapshots per canvas. */
 export const VERSION_RETENTION_LIMIT = 50;
 
-/** Insert a snapshot row, then trim old snapshots beyond the retention limit. */
 export async function recordVersionSnapshot(
     canvasId: string,
     snapshot: {

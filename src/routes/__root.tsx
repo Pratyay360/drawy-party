@@ -86,7 +86,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
                     async
                     src="//gc.zgo.at/count.js"
                 ></script>
-                <WebsiteCarbonBadge dark />
+                <WebsiteCarbonBadge dark site="https://drawy-party.vercel.app/" />
             </body>
         </html>
     );
