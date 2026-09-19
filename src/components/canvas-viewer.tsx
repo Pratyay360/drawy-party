@@ -9,7 +9,11 @@ import { Token } from "@astryxdesign/core/Token";
 import { useNavigate } from "@tanstack/react-router";
 import { Eye, Loader2, LogIn, PenTool, RefreshCw } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
-import { type CanvasData, loadPublicCanvas, sanitizeExcalidrawAppState } from "../services/canvases";
+import {
+    type CanvasData,
+    loadPublicCanvas,
+    sanitizeExcalidrawAppState,
+} from "../services/canvases";
 
 function withTimeout<T>(promise: Promise<T>, ms: number, label: string): Promise<T> {
     let timer: ReturnType<typeof setTimeout>;

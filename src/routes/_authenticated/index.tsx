@@ -205,9 +205,7 @@ function Home() {
                                                         <Token
                                                             label="Public"
                                                             size="sm"
-                                                            icon={
-                                                                <Icon icon={Globe} size="sm" />
-                                                            }
+                                                            icon={<Icon icon={Globe} size="sm" />}
                                                             description="Anyone with the link can view"
                                                         />
                                                     )}

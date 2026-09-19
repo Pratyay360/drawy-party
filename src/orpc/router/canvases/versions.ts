@@ -4,7 +4,12 @@ import { z } from "zod";
 import { db } from "#/lib/db";
 import { canvases, canvasVersions } from "#/lib/db/schema";
 import { base } from "../../context";
-import { canReadCanvas, canWriteCanvas, recordVersionSnapshot, VERSION_RETENTION_LIMIT } from "./helpers";
+import {
+    canReadCanvas,
+    canWriteCanvas,
+    recordVersionSnapshot,
+    VERSION_RETENTION_LIMIT,
+} from "./helpers";
 import type { CanvasVersion } from "#/lib/db/schema";
 
 const versionMetaSchema = z.object({
@@ -16,7 +21,11 @@ const versionMetaSchema = z.object({
 
 async function requireReadableCanvas(canvasId: string, username: string | undefined) {
     const [row] = await db
-        .select({ userId: canvases.userId, appState: canvases.appState, isPublic: canvases.isPublic })
+        .select({
+            userId: canvases.userId,
+            appState: canvases.appState,
+            isPublic: canvases.isPublic,
+        })
         .from(canvases)
         .where(eq(canvases.id, canvasId))
         .limit(1);
@@ -86,7 +95,12 @@ export const get = base
         const [row] = await db
             .select()
             .from(canvasVersions)
-            .where(and(eq(canvasVersions.id, input.versionId), eq(canvasVersions.canvasId, input.canvasId)))
+            .where(
+                and(
+                    eq(canvasVersions.id, input.versionId),
+                    eq(canvasVersions.canvasId, input.canvasId),
+                ),
+            )
             .limit(1);
         if (!row) throw new ORPCError("NOT_FOUND", { message: "Version not found" });
         const version = row as CanvasVersion;
@@ -109,7 +123,12 @@ export const restore = base
         const [snapshotRow] = await db
             .select()
             .from(canvasVersions)
-            .where(and(eq(canvasVersions.id, input.versionId), eq(canvasVersions.canvasId, input.canvasId)))
+            .where(
+                and(
+                    eq(canvasVersions.id, input.versionId),
+                    eq(canvasVersions.canvasId, input.canvasId),
+                ),
+            )
             .limit(1);
         if (!snapshotRow) throw new ORPCError("NOT_FOUND", { message: "Version not found" });
         const snapshot = snapshotRow as CanvasVersion;

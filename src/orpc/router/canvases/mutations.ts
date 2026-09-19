@@ -4,12 +4,7 @@ import { z } from "zod";
 import { db } from "#/lib/db";
 import { canvases } from "#/lib/db/schema";
 import { base } from "../../context";
-import {
-    fail,
-    maybeRecordPeriodicVersion,
-    parseCanvasAppState,
-    toMeta,
-} from "./helpers";
+import { fail, maybeRecordPeriodicVersion, parseCanvasAppState, toMeta } from "./helpers";
 
 export const create = base
     .input(z.object({ title: z.string() }))

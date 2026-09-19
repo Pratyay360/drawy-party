@@ -3,6 +3,7 @@ import { createRootRouteWithContext, HeadContent, Scripts } from "@tanstack/reac
 import { useEffect, useState } from "react";
 import { AppThemeProvider } from "../components/app-theme-provider";
 import { GlobalDialogs } from "../components/global-dialogs";
+import { WebsiteCarbonBadge } from "react-websitecarbon-badge";
 import "../styles.css";
 
 /**
@@ -80,6 +81,12 @@ function RootDocument({ children }: { children: React.ReactNode }) {
                 </AppThemeProvider>
                 <Devtools />
                 <Scripts />
+                <script
+                    data-goatcounter="https://drawyparty.goatcounter.com/count"
+                    async
+                    src="//gc.zgo.at/count.js"
+                ></script>
+                <WebsiteCarbonBadge dark />
             </body>
         </html>
     );
