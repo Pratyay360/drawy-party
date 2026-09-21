@@ -14,6 +14,7 @@ import { Text } from "@astryxdesign/core/Text";
 import { Link, useNavigate, useParams } from "@tanstack/react-router";
 import { FileText, Library, Loader2, PenTool, Plus, Trash2 } from "lucide-react";
 import { useCallback, useEffect, useRef } from "react";
+import { WebsiteCarbonBadge } from "react-websitecarbon-badge";
 import { useSidebarStore } from "#/stores/sidebar";
 import { subscribeCanvasListChanged } from "#/utils/canvas-realtime";
 import { createCanvas, deleteCanvas, listCanvases } from "../../services/canvases";
@@ -189,7 +190,12 @@ export function Sidebar() {
                     <SideNavCollapseButton />
                 </>
             }
-            footer={<SidebarFooter />}
+            footer={
+                <>
+                    <WebsiteCarbonBadge dark site="https://drawy-party.vercel.app/" />
+                    <SidebarFooter />
+                </>
+            }
         >
             {isLoadingCanvases && canvases.length === 0 ? (
                 <SideNavSection title="Loading" isHeaderHidden>

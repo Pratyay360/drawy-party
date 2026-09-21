@@ -3,7 +3,6 @@ import { createRootRouteWithContext, HeadContent, Scripts } from "@tanstack/reac
 import { useEffect, useState } from "react";
 import { AppThemeProvider } from "../components/app-theme-provider";
 import { GlobalDialogs } from "../components/global-dialogs";
-import { WebsiteCarbonBadge } from "react-websitecarbon-badge";
 import "../styles.css";
 
 /**
@@ -86,7 +85,6 @@ function RootDocument({ children }: { children: React.ReactNode }) {
                     async
                     src="//gc.zgo.at/count.js"
                 ></script>
-                <WebsiteCarbonBadge dark site="https://drawy-party.vercel.app/" />
             </body>
         </html>
     );
