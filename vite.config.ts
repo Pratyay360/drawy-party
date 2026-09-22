@@ -30,7 +30,7 @@ export default defineConfig({
         react(),
         tailwindcss(),
         nitro({
-            preset: "vercel",
+            preset: "netlify",
             features: {
                 websocket: true,
             },
